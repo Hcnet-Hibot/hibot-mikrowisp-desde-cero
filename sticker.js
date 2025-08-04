@@ -31,6 +31,11 @@ router.post('/api/enviar-sticker', async (req, res) => {
       'x-app-secret': APP_SECRET
     };
 
+    // Debug: muestra en consola las variables que llegan
+    console.log("APP_ID:", APP_ID);
+    console.log("APP_SECRET:", APP_SECRET);
+    console.log("CHANNEL_ID:", CHANNEL_ID);
+
     const hibotResponse = await axios.post(HIBOT_API_URL, payload, { headers });
 
     res.json({
