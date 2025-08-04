@@ -6,56 +6,32 @@ const hibot = require('./hibot');
 const app = express();
 app.use(express.json());
 
-// --- Consulta cliente por cédula (GET y POST) ---
-app.get('/api/cliente', async (req, res) => {
-  const cedula = req.query.cedula;
-  if (!cedula) return res.status(400).json({ estado: 'error', mensaje: 'Cédula no proporcionada' });
-  const datos = await mikrowisp.consultarClientePorCedula(cedula);
-  res.json(datos);
-});
-
+// Endpoint principal
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body;
-  if (!cedula) return res.status(400).json({ estado: 'error', mensaje: 'Cédula no proporcionada' });
+  if (!cedula) {
+    return res.status(400).json({ mensaje: 'Cédula no proporcionada' });
+  }
+
   const datos = await mikrowisp.consultarClientePorCedula(cedula);
-  res.json(datos);
-});
 
-// --- Enviar imagen por Hibot ---
-app.post('/api/enviar-imagen', async (req, res) => {
-  const { numero, url } = req.body;
-  if (!numero || !url) return res.status(400).json({ estado: 'error', mensaje: 'Falta el número o la URL de la imagen' });
-  try {
-    const resp = await hibot.enviarMensajeHibot({
-      recipient: numero,
-      media: url,
-      mediaType: 'IMAGE',
-      mediaFileName: 'imagen.jpg'
-    });
-    res.json({ estado: 'exito', respuesta: resp });
-  } catch (error) {
-    res.status(500).json({ estado: 'error', mensaje: error.response?.data || error.message });
+  if (!datos) {
+    return res.json({ mensaje: 'No existe el cliente con la cédula indicada.' });
   }
-});
 
-// --- Enviar sticker por Hibot (.webp) ---
-app.post('/api/enviar-sticker', async (req, res) => {
-  const { numero, url } = req.body;
-  if (!numero || !url) return res.status(400).json({ estado: 'error', mensaje: 'Falta el número o la URL del sticker' });
-  try {
-    const resp = await hibot.enviarMensajeHibot({
-      recipient: numero,
-      media: url,
-      mediaType: 'STICKER',
-      mediaFileName: 'sticker.webp'
+  // Envía el mensaje automático al WhatsApp del cliente
+  if (datos.telefono && datos.mensaje) {
+    await hibot.enviarMensajeHibot({
+      recipient: datos.telefono,
+      text: datos.mensaje
     });
-    res.json({ estado: 'exito', respuesta: resp });
-  } catch (error) {
-    res.status(500).json({ estado: 'error', mensaje: error.response?.data || error.message });
   }
+
+  // Devuelve solo un mensaje fijo al webhook de Hibot
+  res.json({ mensaje: '¡Listo! Tu información fue enviada por WhatsApp.' });
 });
 
-// --- Puerto de la app ---
+// Puerto
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
