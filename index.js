@@ -21,16 +21,16 @@ app.post('/api/cliente', async (req, res) => {
   res.json(datos);
 });
 
-// Endpoint para enviar sticker (ejemplo usando URL directa)
-app.post('/api/enviar-sticker', async (req, res) => {
-  const { numero, url } = req.body; // numero en formato internacional, url del .webp en Google Drive
-  if (!numero || !url) return res.status(400).json({ error: 'Falta el número o la URL del sticker' });
+// Enviar imagen por Hibot (funciona para JPG, PNG, GIF, etc)
+app.post('/api/enviar-imagen', async (req, res) => {
+  const { numero, url } = req.body;
+  if (!numero || !url) return res.status(400).json({ error: 'Falta el número o la URL de la imagen' });
   try {
     const resp = await hibot.enviarMensajeHibot({
       recipient: numero,
       media: url,
-      mediaType: 'STICKER',
-      mediaFileName: 'sticker.webp'
+      mediaType: 'IMAGE',
+      mediaFileName: 'imagen.jpg'
     });
     res.json({ estado: 'exito', respuesta: resp });
   } catch (error) {
@@ -38,15 +38,16 @@ app.post('/api/enviar-sticker', async (req, res) => {
   }
 });
 
-// Endpoint para enviar texto (ejemplo)
-app.post('/api/enviar-texto', async (req, res) => {
-  const { numero, content } = req.body;
-  if (!numero || !content) return res.status(400).json({ error: 'Faltan datos' });
+// Enviar sticker por Hibot (.webp, cuando Hibot lo acepte)
+app.post('/api/enviar-sticker', async (req, res) => {
+  const { numero, url } = req.body;
+  if (!numero || !url) return res.status(400).json({ error: 'Falta el número o la URL del sticker' });
   try {
     const resp = await hibot.enviarMensajeHibot({
       recipient: numero,
-      content,
-      mediaType: 'TEXT'
+      media: url,
+      mediaType: 'STICKER',
+      mediaFileName: 'sticker.webp'
     });
     res.json({ estado: 'exito', respuesta: resp });
   } catch (error) {

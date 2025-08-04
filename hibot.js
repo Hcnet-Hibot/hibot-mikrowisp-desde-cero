@@ -15,13 +15,13 @@ async function obtenerTokenHibot() {
   return res.data.token;
 }
 
-// Envía mensaje o sticker usando Hibot (mediaType: 'STICKER', 'IMAGE', 'TEXT')
+// Envía mensaje, imagen o sticker usando Hibot
 async function enviarMensajeHibot({ recipient, media, mediaType, mediaFileName, content }) {
   const token = await obtenerTokenHibot();
   const payload = [
     {
       channelId,
-      recipient, // ejemplo: '593986365165'
+      recipient, // '593xxxxxxxxx'
       ...(media ? { media } : {}),
       ...(mediaType ? { mediaType } : {}),
       ...(mediaFileName ? { mediaFileName } : {}),
