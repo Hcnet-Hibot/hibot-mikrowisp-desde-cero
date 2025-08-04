@@ -4,7 +4,6 @@ const https = require('https');
 
 const apiUrl = process.env.MIKROWISP_API;
 const token = process.env.MIKROWISP_TOKEN;
-
 const agent = new https.Agent({ rejectUnauthorized: false });
 
 async function consultarClientePorCedula(cedula) {
@@ -14,10 +13,7 @@ async function consultarClientePorCedula(cedula) {
     const response = await axios.post(url, body, { httpsAgent: agent });
     const cliente = response.data.datos ? response.data.datos[0] : null;
 
-    if (!cliente) {
-      const msg = 'No existe el cliente con la cédula indicada.';
-      return { mensaje: msg, text: msg, respuesta: msg };
-    }
+    if (!cliente) return null;
 
     const estadoServicio = (cliente.estado || '').toUpperCase();
     const facturasNoPagadas = cliente.facturacion?.facturas_nopagadas || 0;
@@ -38,15 +34,9 @@ async function consultarClientePorCedula(cedula) {
       mensaje = "No se ha podido determinar el estado de su servicio, contacte soporte.";
     }
 
-    // Devuelve el mensaje en varios campos
-    return {
-      mensaje,
-      text: mensaje,
-      respuesta: mensaje
-    };
+    return { mensaje };
   } catch (error) {
-    const msg = 'Error al obtener datos del cliente.';
-    return { mensaje: msg, text: msg, respuesta: msg };
+    return null;
   }
 }
 
