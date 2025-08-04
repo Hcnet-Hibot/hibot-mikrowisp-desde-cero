@@ -6,25 +6,26 @@ const hibot = require('./hibot');
 const app = express();
 app.use(express.json());
 
-// --- Consulta cliente por cédula (GET y POST) ---
+// === Endpoint GET para consulta por cédula ===
 app.get('/api/cliente', async (req, res) => {
   const cedula = req.query.cedula;
-  if (!cedula) return res.status(400).json({ estado: 'error', mensaje: 'Cédula no proporcionada' });
+  if (!cedula) return res.status(400).json({ mensaje: 'Cédula no proporcionada' });
   const datos = await mikrowisp.consultarClientePorCedula(cedula);
   res.json(datos);
 });
 
+// === Endpoint POST para consulta por cédula ===
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body;
-  if (!cedula) return res.status(400).json({ estado: 'error', mensaje: 'Cédula no proporcionada' });
+  if (!cedula) return res.status(400).json({ mensaje: 'Cédula no proporcionada' });
   const datos = await mikrowisp.consultarClientePorCedula(cedula);
   res.json(datos);
 });
 
-// --- Enviar imagen por Hibot ---
+// === Endpoint para enviar imagen ===
 app.post('/api/enviar-imagen', async (req, res) => {
   const { numero, url } = req.body;
-  if (!numero || !url) return res.status(400).json({ estado: 'error', mensaje: 'Falta el número o la URL de la imagen' });
+  if (!numero || !url) return res.status(400).json({ mensaje: 'Falta el número o la URL de la imagen' });
   try {
     const resp = await hibot.enviarMensajeHibot({
       recipient: numero,
@@ -34,14 +35,14 @@ app.post('/api/enviar-imagen', async (req, res) => {
     });
     res.json({ estado: 'exito', respuesta: resp });
   } catch (error) {
-    res.status(500).json({ estado: 'error', mensaje: error.response?.data || error.message });
+    res.status(500).json({ mensaje: error.response?.data || error.message });
   }
 });
 
-// --- Enviar sticker por Hibot (.webp) ---
+// === Endpoint para enviar sticker ===
 app.post('/api/enviar-sticker', async (req, res) => {
   const { numero, url } = req.body;
-  if (!numero || !url) return res.status(400).json({ estado: 'error', mensaje: 'Falta el número o la URL del sticker' });
+  if (!numero || !url) return res.status(400).json({ mensaje: 'Falta el número o la URL del sticker' });
   try {
     const resp = await hibot.enviarMensajeHibot({
       recipient: numero,
@@ -51,11 +52,28 @@ app.post('/api/enviar-sticker', async (req, res) => {
     });
     res.json({ estado: 'exito', respuesta: resp });
   } catch (error) {
-    res.status(500).json({ estado: 'error', mensaje: error.response?.data || error.message });
+    res.status(500).json({ mensaje: error.response?.data || error.message });
   }
 });
 
-// --- Puerto de la app ---
+// === NUEVO ENDPOINT: Consulta y envía mensaje directo al número recibido ===
+app.post('/api/cliente-enviar', async (req, res) => {
+  const { cedula, numero } = req.body;
+  if (!cedula || !numero) return res.status(400).json({ estado: 'error', mensaje: 'Faltan datos requeridos (cedula y numero)' });
+
+  const datos = await mikrowisp.consultarClientePorCedula(cedula);
+
+  // Enviar el mensaje al número recibido
+  await hibot.enviarMensajeHibot({
+    recipient: numero,
+    content: datos.mensaje
+  });
+
+  // Responder fijo a Hibot
+  res.json({ estado: 'exito', mensaje: '¡Listo! Consulta enviada a tu WhatsApp.' });
+});
+
+// Puerto
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
