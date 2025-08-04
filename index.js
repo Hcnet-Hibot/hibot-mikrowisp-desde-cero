@@ -6,7 +6,7 @@ const mikrowisp = require('./mikrowisp');
 const app = express();
 app.use(express.json());
 
-// Endpoint para consultar por cédula (GET)
+// Endpoint: Consulta por cédula
 app.get('/api/cliente', async (req, res) => {
   const cedula = req.query.cedula;
   if (!cedula) {
@@ -19,6 +19,12 @@ app.get('/api/cliente', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos del cliente.' });
   }
 });
+
+// Endpoint: Enviar sticker (Hibot)
+const stickerRouter = require('./sticker');
+app.use(stickerRouter);
+
+// (Puedes agregar más endpoints aquí)
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
