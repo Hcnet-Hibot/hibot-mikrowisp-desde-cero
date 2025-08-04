@@ -7,9 +7,6 @@ const token = process.env.MIKROWISP_TOKEN;
 
 const agent = new https.Agent({ rejectUnauthorized: false });
 
-/**
- * Consulta detalles de cliente por cédula y arma un mensaje personalizado según el estado real
- */
 async function consultarClientePorCedula(cedula) {
   try {
     const url = `${apiUrl}/GetClientsDetails`;
@@ -18,15 +15,14 @@ async function consultarClientePorCedula(cedula) {
     const cliente = response.data.datos ? response.data.datos[0] : null;
 
     if (!cliente) {
-      return { estado: 'error', mensaje: 'No existe el cliente con la cédula indicada.' };
+      const msg = 'No existe el cliente con la cédula indicada.';
+      return { mensaje: msg, text: msg, respuesta: msg };
     }
 
-    // Obtén datos clave
     const estadoServicio = (cliente.estado || '').toUpperCase();
     const facturasNoPagadas = cliente.facturacion?.facturas_nopagadas || 0;
     const totalFacturas = cliente.facturacion?.total_facturas || "0.00";
 
-    // Mensaje según estado exacto
     let mensaje = '';
     if (estadoServicio === 'ACTIVO') {
       if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
@@ -42,20 +38,15 @@ async function consultarClientePorCedula(cedula) {
       mensaje = "No se ha podido determinar el estado de su servicio, contacte soporte.";
     }
 
-    // Respuesta estructurada para Hibot
+    // Devuelve el mensaje en varios campos compatibles
     return {
-      estado: 'exito',
-      datos: {
-        nombre: cliente.nombre,
-        cedula: cliente.cedula,
-        estado: estadoServicio,
-        facturas_nopagadas: facturasNoPagadas,
-        total_facturas: totalFacturas
-      },
-      mensaje // Mensaje listo para mostrar en Hibot
+      mensaje,
+      text: mensaje,
+      respuesta: mensaje
     };
   } catch (error) {
-    return { estado: 'error', mensaje: 'Error al obtener datos del cliente.' };
+    const msg = 'Error al obtener datos del cliente.';
+    return { mensaje: msg, text: msg, respuesta: msg };
   }
 }
 
