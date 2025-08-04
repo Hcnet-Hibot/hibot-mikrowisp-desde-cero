@@ -20,23 +20,24 @@ async function consultarClientePorCedula(cedula) {
     const totalFacturas = cliente.facturacion?.total_facturas || "0.00";
     const nombreCompleto = cliente.nombre || 'Usuario';
 
-    let mensajeEstado = '';
-    if (estadoServicio === 'ACTIVO') {
-      if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
-        mensajeEstado = "su servicio se encuentra activo, aún no se le han generado facturas pendientes.";
-      } else {
-        mensajeEstado = `ya se le ha generado su factura, puede pagar en cualquier momento. Su valor total es de $${totalFacturas}.`;
-      }
-    } else if (estadoServicio === 'SUSPENDIDO') {
-      mensajeEstado = `su servicio se encuentra suspendido y debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}.`;
-    } else if (estadoServicio === 'RETIRADO') {
-      mensajeEstado = "lo sentimos! El cliente se ha retirado de nuestro servicio.";
+    let mensajeFinal = '';
+    if (estadoServicio === 'RETIRADO') {
+      mensajeFinal = "Lo sentimos! El cliente se ha retirado de nuestro servicio.";
     } else {
-      mensajeEstado = "no se ha podido determinar el estado de su servicio, contacte soporte.";
+      let mensajeEstado = '';
+      if (estadoServicio === 'ACTIVO') {
+        if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
+          mensajeEstado = "su servicio se encuentra activo, aún no se le han generado facturas pendientes.";
+        } else {
+          mensajeEstado = `ya se le ha generado su factura, puede pagar en cualquier momento. Su valor total es de $${totalFacturas}.`;
+        }
+      } else if (estadoServicio === 'SUSPENDIDO') {
+        mensajeEstado = `su servicio se encuentra suspendido y debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}.`;
+      } else {
+        mensajeEstado = "no se ha podido determinar el estado de su servicio, contacte soporte.";
+      }
+      mensajeFinal = `Estimado/a ${nombreCompleto}, ${mensajeEstado}`;
     }
-
-    // Mensaje final personalizado
-    const mensajeFinal = `Estimado/a ${nombreCompleto}, ${mensajeEstado}`;
 
     return { mensaje: mensajeFinal };
   } catch (error) {
