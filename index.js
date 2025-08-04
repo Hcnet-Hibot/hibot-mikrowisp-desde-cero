@@ -5,9 +5,23 @@ const mikrowisp = require('./mikrowisp');
 const app = express();
 app.use(express.json());
 
-// Endpoint para consultar por cédula (GET)
+// Endpoint GET (actual, por query param)
 app.get('/api/cliente', async (req, res) => {
   const cedula = req.query.cedula;
+  if (!cedula) {
+    return res.status(400).json({ error: 'Cédula no proporcionada' });
+  }
+  try {
+    const datos = await mikrowisp.consultarClientePorCedula(cedula);
+    res.json(datos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener datos del cliente.' });
+  }
+});
+
+// Endpoint POST (nuevo, por body)
+app.post('/api/cliente', async (req, res) => {
+  const { cedula } = req.body;
   if (!cedula) {
     return res.status(400).json({ error: 'Cédula no proporcionada' });
   }
