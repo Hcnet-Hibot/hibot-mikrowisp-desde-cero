@@ -19,6 +19,8 @@ async function consultarClientePorCedula(cedula) {
     const facturasNoPagadas = cliente.facturacion?.facturas_nopagadas || 0;
     const totalFacturas = cliente.facturacion?.total_facturas || "0.00";
     const nombreCompleto = cliente.nombre || 'Usuario';
+    const fechaCorte = cliente.facturacion?.fecha_corte || null;
+    const diaPago = cliente.facturacion?.dia_pago || null;
 
     let mensajeFinal = '';
     if (estadoServicio === 'RETIRADO') {
@@ -39,7 +41,11 @@ async function consultarClientePorCedula(cedula) {
       mensajeFinal = `Estimado/a ${nombreCompleto}, ${mensajeEstado}`;
     }
 
-    return { mensaje: mensajeFinal };
+    return {
+      mensaje: mensajeFinal,
+      fecha_corte: fechaCorte,
+      dia_pago: diaPago
+    };
   } catch (error) {
     return { mensaje: 'Ocurrió un error procesando la consulta.' };
   }
