@@ -1,29 +1,41 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const API_URL = 'https://api.hibot.us/message/v1/send-message'; // O la URL de Hibot que uses
+const appId = process.env.HIBOT_APP_ID;
+const appSecret = process.env.HIBOT_APP_SECRET;
+const channelId = process.env.HIBOT_CHANNEL_ID;
 
-async function enviarMensajeHibot({ recipient, text }) {
-  try {
-    const res = await axios.post(
-      API_URL,
-      {
-        recipient,
-        message: text,
-        channelId: process.env.HIBOT_CHANNEL_ID
-      },
-      {
-        headers: {
-          'App-Id': process.env.HIBOT_APP_ID,
-          'App-Secret': process.env.HIBOT_APP_SECRET,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    return res.data;
-  } catch (error) {
-    return { error: error.message };
-  }
+// Obtiene el token JWT de Hibot
+async function obtenerTokenHibot() {
+  const url = 'https://pdn.api.hibot.us/api_external/login';
+  const res = await axios.post(url, {
+    appId,
+    appSecret
+  });
+  return res.data.token;
+}
+
+// Envía mensaje, imagen o sticker usando Hibot
+async function enviarMensajeHibot({ recipient, media, mediaType, mediaFileName, content }) {
+  const token = await obtenerTokenHibot();
+  const payload = [
+    {
+      channelId,
+      recipient, // '593xxxxxxxxx'
+      ...(media ? { media } : {}),
+      ...(mediaType ? { mediaType } : {}),
+      ...(mediaFileName ? { mediaFileName } : {}),
+      ...(content ? { content } : {})
+    }
+  ];
+
+  const res = await axios.post('https://pdn.api.hibot.us/api_external/messages', payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return res.data;
 }
 
 module.exports = { enviarMensajeHibot };
