@@ -11,16 +11,13 @@ async function consultarClientePorCedula(cedula) {
   try {
     const url = `${apiUrl}/GetClientsDetails`;
     const body = { token, cedula };
-
     const response = await axios.post(url, body, { httpsAgent: agent });
-
     const cliente = response.data.datos ? response.data.datos[0] : null;
 
     if (!cliente) {
       return { estado: 'error', mensaje: 'No existe el cliente con la cédula indicada.' };
     }
 
-    // Aquí puedes personalizar los datos que Hibot debe mostrar:
     return {
       estado: 'exito',
       datos: {
