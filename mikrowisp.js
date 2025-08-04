@@ -38,7 +38,7 @@ async function consultarClientePorCedula(cedula) {
       mensaje = "No se ha podido determinar el estado de su servicio, contacte soporte.";
     }
 
-    // Devuelve el mensaje en varios campos compatibles
+    // Devuelve el mensaje en varios campos
     return {
       mensaje,
       text: mensaje,
