@@ -8,7 +8,7 @@ const token = process.env.MIKROWISP_TOKEN;
 const agent = new https.Agent({ rejectUnauthorized: false });
 
 /**
- * Consulta detalles de cliente por cédula y arma un mensaje personalizado
+ * Consulta detalles de cliente por cédula y arma un mensaje personalizado según el estado real
  */
 async function consultarClientePorCedula(cedula) {
   try {
@@ -22,20 +22,22 @@ async function consultarClientePorCedula(cedula) {
     }
 
     // Obtén datos clave
-    const estadoServicio = cliente.estado;
+    const estadoServicio = (cliente.estado || '').toUpperCase();
     const facturasNoPagadas = cliente.facturacion?.facturas_nopagadas || 0;
     const totalFacturas = cliente.facturacion?.total_facturas || "0.00";
 
-    // Lógica de mensajes personalizados
+    // Mensaje según estado exacto
     let mensaje = '';
-    if (estadoServicio === 'activo') {
+    if (estadoServicio === 'ACTIVO') {
       if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
         mensaje = "Su servicio se encuentra activo, aún no se le han generado facturas pendientes.";
       } else {
         mensaje = `Ya se le ha generado su factura, puede pagar en cualquier momento. Su valor total es de $${totalFacturas}.`;
       }
-    } else if (estadoServicio === 'suspendido' || estadoServicio === 'cortado') {
+    } else if (estadoServicio === 'SUSPENDIDO') {
       mensaje = `Su servicio se encuentra suspendido y debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}.`;
+    } else if (estadoServicio === 'RETIRADO') {
+      mensaje = "Lo sentimos! El cliente se ha retirado de nuestro servicio.";
     } else {
       mensaje = "No se ha podido determinar el estado de su servicio, contacte soporte.";
     }
