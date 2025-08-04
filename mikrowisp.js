@@ -1,4 +1,3 @@
-// mikrowisp.js
 require('dotenv').config();
 const axios = require('axios');
 const https = require('https');
@@ -21,16 +20,13 @@ async function consultarClientePorCedula(cedula) {
       return { estado: 'error', mensaje: 'No existe el cliente con la cédula indicada.' };
     }
 
+    // Aquí puedes personalizar los datos que Hibot debe mostrar:
     return {
       estado: 'exito',
       datos: {
-        id: cliente.id,
         nombre: cliente.nombre,
         cedula: cliente.cedula,
         estado: cliente.estado,
-        movil: cliente.movil,
-        direccion: cliente.direccion_principal,
-        plan: cliente.servicios?.[0]?.perfil || '',
         facturas_nopagadas: cliente.facturacion?.facturas_nopagadas || 0,
         total_facturas: cliente.facturacion?.total_facturas || "0.00"
       }
