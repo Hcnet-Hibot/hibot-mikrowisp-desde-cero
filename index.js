@@ -6,25 +6,25 @@ const hibot = require('./hibot');
 const app = express();
 app.use(express.json());
 
-// Consulta cliente por cédula (GET y POST)
+// --- Consulta cliente por cédula (GET y POST) ---
 app.get('/api/cliente', async (req, res) => {
   const cedula = req.query.cedula;
-  if (!cedula) return res.status(400).json({ error: 'Cédula no proporcionada' });
+  if (!cedula) return res.status(400).json({ estado: 'error', mensaje: 'Cédula no proporcionada' });
   const datos = await mikrowisp.consultarClientePorCedula(cedula);
   res.json(datos);
 });
 
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body;
-  if (!cedula) return res.status(400).json({ error: 'Cédula no proporcionada' });
+  if (!cedula) return res.status(400).json({ estado: 'error', mensaje: 'Cédula no proporcionada' });
   const datos = await mikrowisp.consultarClientePorCedula(cedula);
   res.json(datos);
 });
 
-// Enviar imagen por Hibot (funciona para JPG, PNG, GIF, etc)
+// --- Enviar imagen por Hibot ---
 app.post('/api/enviar-imagen', async (req, res) => {
   const { numero, url } = req.body;
-  if (!numero || !url) return res.status(400).json({ error: 'Falta el número o la URL de la imagen' });
+  if (!numero || !url) return res.status(400).json({ estado: 'error', mensaje: 'Falta el número o la URL de la imagen' });
   try {
     const resp = await hibot.enviarMensajeHibot({
       recipient: numero,
@@ -38,10 +38,10 @@ app.post('/api/enviar-imagen', async (req, res) => {
   }
 });
 
-// Enviar sticker por Hibot (.webp, cuando Hibot lo acepte)
+// --- Enviar sticker por Hibot (.webp) ---
 app.post('/api/enviar-sticker', async (req, res) => {
   const { numero, url } = req.body;
-  if (!numero || !url) return res.status(400).json({ error: 'Falta el número o la URL del sticker' });
+  if (!numero || !url) return res.status(400).json({ estado: 'error', mensaje: 'Falta el número o la URL del sticker' });
   try {
     const resp = await hibot.enviarMensajeHibot({
       recipient: numero,
@@ -55,6 +55,7 @@ app.post('/api/enviar-sticker', async (req, res) => {
   }
 });
 
+// --- Puerto de la app ---
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
