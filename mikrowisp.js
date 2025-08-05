@@ -52,7 +52,7 @@ async function consultarClientePorCedula(cedula) {
             `🌟 Estimado/a cliente *${nombreCompleto}*, su servicio está activo ✅ y no tiene facturas pendientes. ¡Gracias por confiar en nosotros!`;
         } else {
           mensajeFinal =
-            `⚠️ Estimado/a cliente ud *${nombreCompleto}*, ya se le ha generado su factura. Puede pagar en cualquier momento. Su valor total es de $${totalFacturas}. 💳`;
+            `⚠️ Estimado/a cliente *${nombreCompleto}*, ya se le ha generado su factura. Puede pagar en cualquier momento. Su valor total es de $${totalFacturas}. 💳`;
         }
       }
       return { mensaje: mensajeFinal };
