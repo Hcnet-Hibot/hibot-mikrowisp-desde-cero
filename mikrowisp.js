@@ -45,7 +45,7 @@ async function consultarClientePorCedula(cedula) {
       let mensajeFinal = '';
       if (estadoServicio === 'SUSPENDIDO') {
         mensajeFinal =
-          `🚫 ${nombreCompleto}, su servicio se encuentra suspendido. Debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
+          `🚫 ${nombreCompleto}, su servicio se encuentra suspendido *POR FALTA DE PAGO*. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
       } else if (estadoServicio === 'ACTIVO') {
         if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
           mensajeFinal =
@@ -70,7 +70,7 @@ async function consultarClientePorCedula(cedula) {
         let mensajeFinal = '';
         if (estadoServicio === 'SUSPENDIDO') {
           mensajeFinal =
-            `🚫 ${nombreCompleto}, su servicio se encuentra suspendido. Debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
+            `🚫 ${nombreCompleto}, su servicio se encuentra suspendido *POR FALTA DE PAGO*. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
         } else if (estadoServicio === 'ACTIVO') {
           if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
             mensajeFinal =
