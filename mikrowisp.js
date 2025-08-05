@@ -30,7 +30,7 @@ async function consultarClientePorCedula(cedula) {
     if ((activos_suspendidos.length === 0 && retirados.length > 0) || clientes.length === 0) {
       return {
         mensaje:
-          "❗No existe un cliente registrado con esa cédula Por favor, verifique sus datos. Si cree que esto es un error, por favor contáctenos."
+          "❗No existe un cliente registrado con esa cédula. Por favor, verifique sus datos. Si cree que esto es un error, contáctenos."
       };
     }
 
@@ -45,7 +45,7 @@ async function consultarClientePorCedula(cedula) {
       let mensajeFinal = '';
       if (estadoServicio === 'SUSPENDIDO') {
         mensajeFinal =
-          `🚫 ${nombreCompleto}, su servicio se encuentra suspendido. Debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya pagó, por favor, espere la reconexión o contacte soporte.`;
+          `🚫 ${nombreCompleto}, su servicio se encuentra suspendido. Debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
       } else if (estadoServicio === 'ACTIVO') {
         if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
           mensajeFinal =
@@ -60,7 +60,7 @@ async function consultarClientePorCedula(cedula) {
 
     // Si hay dos o más líneas activas/suspendidas, mostrar el resumen general
     if (activos_suspendidos.length > 1) {
-      let mensajeTotal = `Estimado/a cliente ud actualmente cuenta con ${activos_suspendidos.length} línea(s) activas con sus datos:\n`;
+      let mensajeTotal = `Estimado/a cliente ud actualmente cuenta con ${activos_suspendidos.length} servicios contratados:\n`;
       activos_suspendidos.forEach(cliente => {
         const estadoServicio = (cliente.estado || '').toUpperCase();
         const facturasNoPagadas = cliente.facturacion?.facturas_nopagadas || 0;
@@ -70,7 +70,7 @@ async function consultarClientePorCedula(cedula) {
         let mensajeFinal = '';
         if (estadoServicio === 'SUSPENDIDO') {
           mensajeFinal =
-            `🚫 ${nombreCompleto}, su servicio se encuentra suspendido. Debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya pagó, por favor, espere la reconexión o contacte soporte.`;
+            `🚫 ${nombreCompleto}, su servicio se encuentra suspendido. Debe cancelar lo antes posible. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
         } else if (estadoServicio === 'ACTIVO') {
           if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
             mensajeFinal =
