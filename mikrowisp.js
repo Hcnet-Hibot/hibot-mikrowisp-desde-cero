@@ -45,14 +45,14 @@ async function consultarClientePorCedula(cedula) {
       let mensajeFinal = '';
       if (estadoServicio === 'SUSPENDIDO') {
         mensajeFinal =
-          `🚫 ${nombreCompleto}, su servicio se encuentra suspendido *POR FALTA DE PAGO*. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
+          `🚫 Estimado/a cliente *${nombreCompleto}*, su servicio se encuentra suspendido *POR FALTA DE PAGO*. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante.`;
       } else if (estadoServicio === 'ACTIVO') {
         if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
           mensajeFinal =
-            `🌟 ${nombreCompleto}, su servicio está activo ✅ y no tiene facturas pendientes. ¡Gracias por confiar en nosotros!`;
+            `🌟 Estimado/a cliente *${nombreCompleto}*, su servicio está activo ✅ y no tiene facturas pendientes. ¡Gracias por confiar en nosotros!`;
         } else {
           mensajeFinal =
-            `⚠️ ${nombreCompleto}, ya se le ha generado su factura. Puede pagar en cualquier momento. Su valor total es de $${totalFacturas}. 💳`;
+            `⚠️ Estimado/a cliente ud *${nombreCompleto}*, ya se le ha generado su factura. Puede pagar en cualquier momento. Su valor total es de $${totalFacturas}. 💳`;
         }
       }
       return { mensaje: mensajeFinal };
@@ -70,14 +70,14 @@ async function consultarClientePorCedula(cedula) {
         let mensajeFinal = '';
         if (estadoServicio === 'SUSPENDIDO') {
           mensajeFinal =
-            `🚫 ${nombreCompleto}, su servicio se encuentra suspendido *POR FALTA DE PAGO*. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
+            `🚫 *${nombreCompleto}*, su servicio se encuentra suspendido *POR FALTA DE PAGO*. Tiene ${facturasNoPagadas} facturas pendientes, por un total de $${totalFacturas}. Si ya realizó su pagó, por favor envie su comprobante`;
         } else if (estadoServicio === 'ACTIVO') {
           if (facturasNoPagadas === 0 || totalFacturas === "0.00") {
             mensajeFinal =
-              `🌟 ${nombreCompleto}, su servicio está activo ✅ y no tiene facturas pendientes. ¡Gracias por confiar en nosotros!`;
+              `🌟 *${nombreCompleto}*, su servicio está activo ✅ y no tiene facturas pendientes. ¡Gracias por confiar en nosotros!`;
           } else {
             mensajeFinal =
-              `⚠️ ${nombreCompleto}, ya se le ha generado su factura. Puede pagar en cualquier momento. Su valor total es de $${totalFacturas}. 💳`;
+              `⚠️ *${nombreCompleto}*, ya se le ha generado su factura. Puede pagar en cualquier momento. Su valor total es de $${totalFacturas}. 💳`;
           }
         }
         mensajeTotal += mensajeFinal + "\n\n";
