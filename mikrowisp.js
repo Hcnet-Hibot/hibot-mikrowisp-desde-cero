@@ -223,15 +223,15 @@ async function consultarClientePorCedula(cedula) {
         if (estado === 'SUSPENDIDO') {
           // Mostrar fechas también en suspendidos
           const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
-          out += `🚫 *${nombre}*: Suspendido *POR FALTA DE PAGO*. Pendientes: ${factNoPag} — Total: $${total}.` +
-                 (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}` : '') +
+          out += `🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. Valor total a pagar: $${total}. 💳` +
+                 (corteStr ? `\n⛔ *Su fecha se realizó el día:* ${corteStr}` : '') +
                  `\n\n`;
         } else if (estado === 'ACTIVO') {
           if (Number(factNoPag) === 0 || String(total) === '0.00') {
             out += `✅ *${nombre}*: Activo y sin deudas.\n\n`;
           } else {
             const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
-            out += `⚠️ *${nombre}*: Factura disponible. Total: $${total}.` +
+            out += `⚠️ *${nombre}*: ya se encuentra disponible su factura. Valor total a pagar: $${total}.` +
                    (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}` : '') +
                    `\n\n`;
           }
