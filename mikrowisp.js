@@ -128,6 +128,7 @@ async function obtenerVencimientoYCorteParaServicio(c) {
       c?.facturacion?.vencimiento ||
       c?.facturacion?.fecha_vencimiento ||
       c?.facturacion?.proximo_pago ||
+      c?.facturacion?.prox_pago ||
       null;
 
     // 2) GetInvoices (1 = No pagadas)
