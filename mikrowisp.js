@@ -190,8 +190,9 @@ async function consultarClientePorCedula(cedula) {
         // también podríamos mostrar fechas aquí si quieres; por ahora mensaje clásico
         return {
           mensaje:
-            `🚫 Estimado/a cliente *${nombre}*, su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
-            `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de $${total}. ` +
+            `🚫 Estimado/a cliente *${nombre}*, Su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
+            `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. ` +
+            (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}-` : '') +
             `Si ya realizó su pago, por favor envíe su comprobante.`
         };
       }
@@ -204,7 +205,7 @@ async function consultarClientePorCedula(cedula) {
         const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
         return {
           mensaje:
-            `⚠️ Estimado/a cliente *${nombre}*, ya se encuentra disponible su factura. Valor total a pagar: $${total}. 💳` +
+            `⚠️ Estimado/a cliente *${nombre}*, Ya se encuentra disponible su factura. El valor total a pagar es: $${total}. 💳` +
             (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}` : '')
         };
       }
@@ -223,15 +224,15 @@ async function consultarClientePorCedula(cedula) {
         if (estado === 'SUSPENDIDO') {
           // Mostrar fechas también en suspendidos
           const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
-          out += `🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. Valor total a pagar: $${total}. 💳` +
-                 (corteStr ? `\n⛔ *Su fecha se realizó el día:* ${corteStr}` : '') +
+          out += `🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${total}. 💳` +
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}-` : '') +
                  `\n\n`;
         } else if (estado === 'ACTIVO') {
           if (Number(factNoPag) === 0 || String(total) === '0.00') {
             out += `✅ *${nombre}*: Activo y sin deudas.\n\n`;
           } else {
             const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
-            out += `⚠️ *${nombre}*: ya se encuentra disponible su factura. Valor total a pagar: $${total}.` +
+            out += `⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${total}.` +
                    (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}` : '') +
                    `\n\n`;
           }
