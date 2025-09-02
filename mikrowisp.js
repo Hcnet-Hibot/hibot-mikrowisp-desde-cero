@@ -104,6 +104,23 @@ async function obtenerFacturaPorId(idfactura) {
   return data.factura;
 }
 
+// Crear Promesa de Pago
+async function crearPromesaPago({ idfactura, fechalimite, descripcion }) {
+  const body = {
+    token,
+    idfactura: Number(idfactura),
+    fechalimite, // 'YYYY-MM-DD'
+    ...(descripcion ? { descripcion } : {})
+  };
+  const data = await apiPost('PromesaPago', body);
+  // La API devuelve: { estado: 'exito', mensaje: 'Promesa de pago registrado correctamente.' }
+  if (data?.estado !== 'exito') {
+    throw new Error(data?.mensaje || 'Error creando promesa de pago');
+  }
+  return data;
+}
+
+
 // Facturas por cliente (0=pagadas, 1=no pagadas, 2=anuladas, vacío=cualquiera)
 async function obtenerFacturasPorCliente({ idcliente, estado = null, limit = 25 }) {
   const body = { token, idcliente: Number(idcliente), limit: Number(limit) };
@@ -261,9 +278,13 @@ async function consultarClientePorCedula(cedula) {
   }
 }
 
+
+
 module.exports = {
   consultarClientePorCedula,
   consultarClientePorCedulaRaw,
   obtenerFacturaPorId,
-  obtenerFacturasPorCliente
+  obtenerFacturasPorCliente,
+  crearPromesaPago,
+  calcularFechaCorteDesdeVencimientoStr 
 };
