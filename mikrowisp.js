@@ -233,7 +233,7 @@ async function consultarClientePorCedula(cedula) {
           } else {
             const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
             out += `⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${total}. 💳` +
-                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '') +
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AMs` : '') +
                    `\n\n`;
           }
         }
