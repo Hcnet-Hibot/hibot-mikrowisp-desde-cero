@@ -192,7 +192,7 @@ async function consultarClientePorCedula(cedula) {
           mensaje:
             `🚫 Estimado/a cliente *${nombre}*, Su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
             `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. ` +
-            (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}-` : '') +
+            (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '') +
             `Si ya realizó su pago, por favor envíe su comprobante.`
         };
       }
@@ -206,7 +206,7 @@ async function consultarClientePorCedula(cedula) {
         return {
           mensaje:
             `⚠️ Estimado/a cliente *${nombre}*, Ya se encuentra disponible su factura. El valor total a pagar es: $${total}. 💳` +
-            (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}` : '')
+            (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '')
         };
       }
     }
@@ -225,7 +225,7 @@ async function consultarClientePorCedula(cedula) {
           // Mostrar fechas también en suspendidos
           const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
           out += `🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${total}. 💳` +
-                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}-` : '') +
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '') +
                  `\n\n`;
         } else if (estado === 'ACTIVO') {
           if (Number(factNoPag) === 0 || String(total) === '0.00') {
@@ -233,7 +233,7 @@ async function consultarClientePorCedula(cedula) {
           } else {
             const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
             out += `⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${total}.` +
-                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}` : '') +
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '') +
                    `\n\n`;
           }
         }
