@@ -187,15 +187,17 @@ async function consultarClientePorCedula(cedula) {
       const nombre = c.nombre || 'Usuario';
 
       if (estado === 'SUSPENDIDO') {
-        // también podríamos mostrar fechas aquí si quieres; por ahora mensaje clásico
-        return {
-          mensaje:
-            `🚫 Estimado/a cliente *${nombre}*, Su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
-            `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. 💳 ` +
-            (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '') +
-            `Si ya realizó su pago, por favor envíe su comprobante.`
-        };
-      }
+  // calcular vencimiento/corte para el servicio suspendido
+  const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
+
+  return {
+    mensaje:
+      `🚫 Estimado/a cliente *${nombre}*, Su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
+      `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. 💳` +
+      (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '') +
+      `\nSi ya realizó su pago, por favor envíe su comprobante.`
+  };
+}
 
       if (estado === 'ACTIVO') {
         if (Number(factNoPag) === 0 || String(total) === '0.00') {
