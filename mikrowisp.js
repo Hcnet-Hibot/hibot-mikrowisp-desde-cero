@@ -191,7 +191,7 @@ async function consultarClientePorCedula(cedula) {
         return {
           mensaje:
             `🚫 Estimado/a cliente *${nombre}*, Su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
-            `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. ` +
+            `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. 💳 ` +
             (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '') +
             `Si ya realizó su pago, por favor envíe su comprobante.`
         };
@@ -232,7 +232,7 @@ async function consultarClientePorCedula(cedula) {
             out += `✅ *${nombre}*: Activo y sin deudas.\n\n`;
           } else {
             const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
-            out += `⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${total}.` +
+            out += `⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${total}. 💳` +
                    (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '') +
                    `\n\n`;
           }
