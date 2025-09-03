@@ -278,6 +278,150 @@ async function consultarClientePorCedula(cedula) {
   }
 }
 
+// ---- Helper: ¿este servicio tiene deuda?
+function servicioTieneDeuda(c) {
+  const nopag = Number(c?.facturacion?.facturas_nopagadas || 0);
+  const total = Number(c?.facturacion?.total_facturas || 0);
+  return nopag > 0 && total > 0;
+}
+
+// ---- NUEVO: evaluación estructurada (para ramificar en HiBot)
+async function evaluarClientePorCedula(cedula) {
+  try {
+    const clientes = await consultarClientePorCedulaRaw(cedula);
+    const activos = clientes.filter(c => (c.estado || '').toUpperCase() === 'ACTIVO');
+    const suspendidos = clientes.filter(c => (c.estado || '').toUpperCase() === 'SUSPENDIDO');
+    const retirados = clientes.filter(c => (c.estado || '').toUpperCase() === 'RETIRADO');
+    const activos_suspendidos = [...activos, ...suspendidos];
+
+    // Nada útil
+    if ((activos_suspendidos.length === 0 && retirados.length > 0) || clientes.length === 0) {
+      return {
+        tieneDeuda: false,
+        variosServicios: 0,
+        recomendacion: 'cerrar',
+        mensaje: '❗No existe un cliente registrado con esa cédula. Por favor verifique sus datos.'
+      };
+    }
+
+    // Un solo servicio (más simple para flujo)
+    if (activos_suspendidos.length === 1) {
+      const c = activos_suspendidos[0];
+      const nombre = c.nombre || 'Usuario';
+      const estado = (c.estado || '').toUpperCase();
+      const factNoPag = Number(c?.facturacion?.facturas_nopagadas || 0);
+      const totalStr = c?.facturacion?.total_facturas ?? '0.00';
+      const total = Number(totalStr || 0);
+
+      const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
+      let tieneDeuda = factNoPag > 0 && total > 0;
+
+      let mensaje = '';
+
+      if (estado === 'SUSPENDIDO') {
+        // Suspensión implica deuda
+        tieneDeuda = true;
+        mensaje =
+          `🚫 Estimado/a *${nombre}*, su servicio está SUSPENDIDO por falta de pago.\n` +
+          `💵 Total pendiente: $${totalStr}.\n` +
+          (vencFmt ? `📅 Vencimiento: ${vencFmt}\n` : '') +
+          (corteStr ? `⛔ Corte: ${corteStr}\n` : '') +
+          `Si ya realizó su pago, por favor envíe su comprobante.`;
+        return {
+          nombre, estado, total: totalStr, facturasPendientes: factNoPag,
+          vencimiento: vencFmt || null, corte: corteStr || null,
+          tieneDeuda, variosServicios: 1,
+          recomendacion: 'pedir_comprobante',
+          mensaje
+        };
+      }
+
+      // ACTIVO
+      if (!tieneDeuda) {
+        mensaje = `🌟 Estimado/a *${nombre}*, su servicio está ACTIVO ✅ y no tiene facturas pendientes. ¡Gracias por confiar en nosotros!`;
+        return {
+          nombre, estado, total: '0.00', facturasPendientes: 0,
+          vencimiento: null, corte: null,
+          tieneDeuda: false, variosServicios: 1,
+          recomendacion: 'cerrar',
+          mensaje
+        };
+      } else {
+        mensaje =
+          `⚠️ Estimado/a *${nombre}*, ya se encuentra disponible su factura. ` +
+          `💵 Total: $${totalStr}.\n` +
+          (vencFmt ? `📅 Vencimiento: ${vencFmt}\n` : '') +
+          (corteStr ? `⛔ Corte: ${corteStr}\n` : '');
+        return {
+          nombre, estado, total: totalStr, facturasPendientes: factNoPag,
+          vencimiento: vencFmt || null, corte: corteStr || null,
+          tieneDeuda: true, variosServicios: 1,
+          recomendacion: 'pedir_comprobante',
+          mensaje
+        };
+      }
+    }
+
+    // Varios servicios: listamos y decidimos si pedir comprobante
+    let tieneDeudaGlobal = false;
+    let out = `Estimado/a cliente, actualmente cuenta con ${activos_suspendidos.length} servicios:\n\n`;
+    const servicios = [];
+
+    for (const c of activos_suspendidos) {
+      const nombre = c.nombre || 'Servicio';
+      const estado = (c.estado || '').toUpperCase();
+      const totalStr = c?.facturacion?.total_facturas ?? '0.00';
+      const factNoPag = Number(c?.facturacion?.facturas_nopagadas || 0);
+      const conDeuda = servicioTieneDeuda(c);
+      if (conDeuda) tieneDeudaGlobal = true;
+
+      let linea = '';
+      let vencFmt = null;
+      let corteStr = null;
+      if (conDeuda || estado === 'SUSPENDIDO') {
+        const r = await obtenerVencimientoYCorteParaServicio(c);
+        vencFmt = r.vencFmt || null;
+        corteStr = r.corteStr || null;
+      }
+
+      if (estado === 'SUSPENDIDO') {
+        linea =
+          `🚫 *${nombre}*: Suspendido por falta de pago. Total: $${totalStr}.` +
+          (vencFmt ? `\n   📅 Vencimiento: ${vencFmt}` : '') +
+          (corteStr ? `\n   ⛔ Corte: ${corteStr}` : '');
+      } else if (!conDeuda) {
+        linea = `✅ *${nombre}*: Activo y sin deudas.`;
+      } else {
+        linea =
+          `⚠️ *${nombre}*: Factura disponible. Total: $${totalStr}.` +
+          (vencFmt ? `\n   📅 Vencimiento: ${vencFmt}` : '') +
+          (corteStr ? `\n   ⛔ Corte: ${corteStr}` : '');
+      }
+
+      servicios.push({
+        nombre, estado, total: totalStr, facturasPendientes: factNoPag,
+        vencimiento: vencFmt, corte: corteStr, tieneDeuda: conDeuda
+      });
+
+      out += linea + `\n\n`;
+    }
+
+    return {
+      variosServicios: activos_suspendidos.length,
+      servicios,
+      tieneDeuda: !!tieneDeudaGlobal,
+      recomendacion: tieneDeudaGlobal ? 'pedir_comprobante' : 'cerrar',
+      mensaje: out.trim()
+    };
+  } catch (e) {
+    if (DEBUG) {
+      return { mensaje: 'Ocurrió un error procesando la consulta.', detalle: { error: e.message } };
+    }
+    return { mensaje: 'Ocurrió un error procesando la consulta.' };
+  }
+}
+
+
 
 
 module.exports = {
@@ -286,5 +430,6 @@ module.exports = {
   obtenerFacturaPorId,
   obtenerFacturasPorCliente,
   crearPromesaPago,
-  calcularFechaCorteDesdeVencimientoStr 
+  calcularFechaCorteDesdeVencimientoStr,
+  evaluarClientePorCedula 
 };

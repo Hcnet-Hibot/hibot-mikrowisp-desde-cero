@@ -4,9 +4,12 @@ const mikrowisp = require('./mikrowisp');
 const hibot = require('./hibot');
 const { limpiarNumeroEcuador } = require('./utils');
 const pkg = require('./package.json');
+const multer = require('multer');               // <-- nuevo
+const upload = multer();                        // <-- nuevo
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Helpers
 function bad(res, msg, code = 400) { return res.status(code).json({ estado: 'error', mensaje: msg }); }
@@ -120,74 +123,110 @@ app.get('/api/factura-corte', async (req, res) => {
   }
 });
 
-// === Crear Promesa de Pago por cédula (3 días por defecto) ===
-app.post('/api/promesa-pago', async (req, res) => {
+// === NUEVO: Evaluación estructurada para ramificar el flujo ===
+app.post('/api/cliente-evaluar', async (req, res) => {
   try {
-    const { cedula, dias = 3, descripcion } = req.body || {};
+    let payload = req.body;
+    if (typeof payload === 'string') {
+      try { payload = JSON.parse(payload); } catch (_) { payload = {}; }
+    }
+    if (!payload || Object.keys(payload).length === 0) payload = req.query || {};
+    const { cedula } = payload || {};
     if (!cedula) return bad(res, 'Cédula no proporcionada');
 
-    // 1) Traer servicios del cliente
-    const clientes = await mikrowisp.consultarClientePorCedulaRaw(cedula);
-    const activos = clientes.filter(c => (c.estado || '').toUpperCase() === 'ACTIVO');
-    const suspendidos = clientes.filter(c => (c.estado || '').toUpperCase() === 'SUSPENDIDO');
-    const candidatos = [...suspendidos, ...activos]; // priorizamos suspendidos
-
-    if (candidatos.length === 0) {
-      return bad(res, 'No se encontraron servicios activos o suspendidos para esa cédula', 404);
-    }
-
-    // Tomar el primer servicio con deuda si es posible
-    let servicioObjetivo = candidatos.find(c => Number(c?.facturacion?.facturas_nopagadas || 0) > 0) || candidatos[0];
-
-    // 2) Buscar facturas NO PAGADAS del servicio
-    const idcliente =
-      servicioObjetivo?.idcliente ??
-      servicioObjetivo?.idCliente ??
-      servicioObjetivo?.cliente_id ??
-      servicioObjetivo?.IdCliente ??
-      servicioObjetivo?.id;
-
-    if (!idcliente) return bad(res, 'No se pudo determinar el ID del cliente para crear la promesa', 422);
-
-    const facturasNoPagadas = await mikrowisp.obtenerFacturasPorCliente({ idcliente, estado: 1, limit: 25 });
-    if (!Array.isArray(facturasNoPagadas) || facturasNoPagadas.length === 0) {
-      return bad(res, 'El cliente no tiene facturas no pagadas para registrar promesa', 409);
-    }
-
-    // Elegimos la factura con vencimiento más cercano (formato 'YYYY-MM-DD')
-    const sel = [...facturasNoPagadas].sort((a, b) => {
-      const va = (a?.vencimiento || '');
-      const vb = (b?.vencimiento || '');
-      return va.localeCompare(vb);
-    })[0];
-
-    // 3) Calcular fecha límite = hoy + N días (tope 20) en formato 'YYYY-MM-DD'
-    const n = Math.min(Math.max(parseInt(dias, 10) || 3, 1), 20);
-    const hoy = new Date();
-    const limite = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + n);
-    const yyyy = limite.getFullYear();
-    const mm = String(limite.getMonth() + 1).padStart(2, '0');
-    const dd = String(limite.getDate()).padStart(2, '0');
-    const fechalimite = `${yyyy}-${mm}-${dd}`;
-
-    // 4) Crear promesa
-    const resp = await mikrowisp.crearPromesaPago({
-      idfactura: sel.id,
-      fechalimite,
-      descripcion: descripcion || `Promesa ${n} día(s) vía Hibot`
-    });
-
-    return ok(res, {
-      mensaje: resp?.mensaje || 'Promesa de pago registrada.',
-      idfactura: sel.id,
-      fechalimite
-    });
+    const r = await mikrowisp.evaluarClientePorCedula(cedula);
+    return ok(res, r);
   } catch (e) {
     return bad(res, e.response?.data || e.message, 500);
   }
 });
 
 
+// === Crear Promesa de Pago por cédula (3 días por defecto) ===
+// Acepta JSON, urlencoded, multipart/form-data (sin archivos) y texto JSON
+app.post(
+  '/api/promesa-pago',
+  upload.none(),                        // <-- parsea form-data (fields)
+  express.text({ type: ['text/*', '*/*'] }), // <-- si viene texto plano
+  async (req, res) => {
+    try {
+      // Normalizar payload
+      let payload = req.body;
+
+      // Si vino como string (por text/plain), intentar parsear JSON
+      if (typeof payload === 'string') {
+        try { payload = JSON.parse(payload); } catch (_) { payload = {}; }
+      }
+
+      // Si vino vacío, usar querystring (?cedula=...)
+      if (!payload || Object.keys(payload).length === 0) {
+        payload = req.query || {};
+      }
+
+      const { cedula, dias = 3, descripcion } = payload || {};
+      if (!cedula) return bad(res, 'Cédula no proporcionada');
+
+      // 1) Traer servicios del cliente
+      const clientes = await mikrowisp.consultarClientePorCedulaRaw(cedula);
+      const activos = clientes.filter(c => (c.estado || '').toUpperCase() === 'ACTIVO');
+      const suspendidos = clientes.filter(c => (c.estado || '').toUpperCase() === 'SUSPENDIDO');
+      const candidatos = [...suspendidos, ...activos]; // priorizamos suspendidos
+
+      if (candidatos.length === 0) {
+        return bad(res, 'No se encontraron servicios activos o suspendidos para esa cédula', 404);
+      }
+
+      // Tomar el primer servicio con deuda si es posible
+      let servicioObjetivo = candidatos.find(c => Number(c?.facturacion?.facturas_nopagadas || 0) > 0) || candidatos[0];
+
+      // 2) Buscar facturas NO PAGADAS del servicio
+      const idcliente =
+        servicioObjetivo?.idcliente ??
+        servicioObjetivo?.idCliente ??
+        servicioObjetivo?.cliente_id ??
+        servicioObjetivo?.IdCliente ??
+        servicioObjetivo?.id;
+
+      if (!idcliente) return bad(res, 'No se pudo determinar el ID del cliente para crear la promesa', 422);
+
+      const facturasNoPagadas = await mikrowisp.obtenerFacturasPorCliente({ idcliente, estado: 1, limit: 25 });
+      if (!Array.isArray(facturasNoPagadas) || facturasNoPagadas.length === 0) {
+        return bad(res, 'El cliente no tiene facturas no pagadas para registrar promesa', 409);
+      }
+
+      // Elegir factura con vencimiento más cercano
+      const sel = [...facturasNoPagadas].sort((a, b) => {
+        const va = (a?.vencimiento || '');
+        const vb = (b?.vencimiento || '');
+        return va.localeCompare(vb);
+      })[0];
+
+      // 3) Calcular fecha límite (hoy + N días, máx 20) -> 'YYYY-MM-DD'
+      const n = Math.min(Math.max(parseInt(dias, 10) || 3, 1), 20);
+      const hoy = new Date();
+      const limite = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + n);
+      const yyyy = limite.getFullYear();
+      const mm = String(limite.getMonth() + 1).padStart(2, '0');
+      const dd = String(limite.getDate()).padStart(2, '0');
+      const fechalimite = `${yyyy}-${mm}-${dd}`;
+
+      // 4) Crear promesa
+      const resp = await mikrowisp.crearPromesaPago({
+        idfactura: sel.id,
+        fechalimite,
+        descripcion: descripcion || `Promesa ${n} día(s) vía Hibot`
+      });
+
+      return ok(res, {
+        mensaje: resp?.mensaje || 'Promesa de pago registrada.',
+        idfactura: sel.id,
+        fechalimite
+      });
+    } catch (e) {
+      return bad(res, e.response?.data || e.message, 500);
+    }
+  }
+);
 
 // === Health / Version ===
 app.get('/health', (req, res) => res.json({ ok: true, uptime: process.uptime(), version: pkg.version }));
