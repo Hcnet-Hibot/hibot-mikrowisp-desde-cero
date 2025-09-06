@@ -364,7 +364,7 @@ async function evaluarClientePorCedula(cedula) {
 
     // Varios servicios: listamos y decidimos si pedir comprobante
     let tieneDeudaGlobal = false;
-    let out = `Estimado/a cliente, actualmente cuenta con ${activos_suspendidos.length} servicios:\n\n`;
+    let out = `Estimado/a cliente, actualmente cuenta con ${activos_suspendidos.length} servicios contratados:\n\n`;
     const servicios = [];
 
     for (const c of activos_suspendidos) {
@@ -384,18 +384,26 @@ async function evaluarClientePorCedula(cedula) {
         corteStr = r.corteStr || null;
       }
 
+      const lineas = [];
+for (let i = 0; i < servicios.length; i++) {
+  const n = `*${i + 1}*`;
+  const pref = `${n}. `;
+  // ...mismo bloque condicional, usando pref al inicio de cada linea
+  lineas.push(linea);
+}
+const SERVICIOS_LISTA = lineas.join('\n\n');
+
+
       if (estado === 'SUSPENDIDO') {
         linea =
-          `🚫 *${nombre}*: Suspendido por falta de pago. Total: $${totalStr}.` +
-          (vencFmt ? `\n   📅 Vencimiento: ${vencFmt}` : '') +
-          (corteStr ? `\n   ⛔ Corte: ${corteStr}` : '');
+          `${pref} 🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
       } else if (!conDeuda) {
-        linea = `✅ *${nombre}*: Activo y sin deudas.`;
+        linea = `${pref} 🌟 *${nombre}*, su servicio está ACTIVO ✅ y no tiene facturas pendientes.`;
       } else {
         linea =
-          `⚠️ *${nombre}*: Factura disponible. Total: $${totalStr}.` +
-          (vencFmt ? `\n   📅 Vencimiento: ${vencFmt}` : '') +
-          (corteStr ? `\n   ⛔ Corte: ${corteStr}` : '');
+          `${pref} ⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳` +
+          (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
       }
 
       servicios.push({
