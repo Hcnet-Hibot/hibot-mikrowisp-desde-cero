@@ -27,6 +27,13 @@ app.get('/api/cliente', async (req, res) => {
   }
 });
 
+// === Limpiar variable de cédula (Hibot) ===
+// Acepta GET o POST y siempre responde con id/ID vacío
+app.all('/api/limpiar-id', (req, res) => {
+  return res.json({ id: '', ID: '' });
+});
+
+
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body || {};
   if (!cedula) return bad(res, 'Cédula no proporcionada');

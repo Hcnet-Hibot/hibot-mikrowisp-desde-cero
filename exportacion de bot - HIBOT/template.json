@@ -4,14 +4,14 @@
             "WhatsApp"
         ],
         "description": "Bienvenido a HCNET! Tu conexión es nuestra prioridad.🛜☺️\n",
-        "name": "Bienvenido V2"
+        "name": "FLUJO HCNET BOT"
     },
     "version": {
         "error_messages": {
             "answer_validation": {
                 "email": "¡Ups¡ Escribiste una dirección de correo inválida.",
-                "number": "Por favor, ingresa solo números y espacios. No se permiten letras.",
-                "text": "Por favor, ingresa solo letras y espacios. No se permiten números."
+                "number": "¡Ups¡ Solo se permiten números y espacios.",
+                "text": "¡Ups¡ Solo se permiten letras y espacios."
             },
             "max_attempts": {
                 "delegate": null,
@@ -24,7 +24,7 @@
                 "message": " "
             },
             "wrong_option": {
-                "message": "¡Ups! Escribiste una opción que no existe en el menú."
+                "message": "⚠️ Escribiste una opción que no existe en el menú, intentalo nuevamente."
             }
         },
         "trigger": {
@@ -37,8 +37,8 @@
         {
             "id": "0369aa3f1c724cd590ba8d7959cdcf9a",
             "type": "DELEGATE",
-            "position_x": 1804.4188900523277,
-            "position_y": -20.912371380901874,
+            "position_x": 1679.1496047757294,
+            "position_y": -149.98671432627333,
             "values": [
                 {
                     "title": "PAGOS.",
@@ -53,10 +53,54 @@
             ]
         },
         {
+            "id": "0a9544c73fea46c1977b93dc35c263b0",
+            "type": "DECISION",
+            "position_x": 1151.787634292349,
+            "position_y": 1054.8601685024637,
+            "values": [
+                {
+                    "conditionalActions": [
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "pedir_comprobante",
+                            "relationalOperator": "EQUAL_TO",
+                            "source": "Recomendacion"
+                        },
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "true",
+                            "relationalOperator": "EQUAL_TO",
+                            "source": "TIENE_DEUDA"
+                        }
+                    ],
+                    "logicalOperator": "AND",
+                    "negativeOptionAction": {
+                        "connection_id": "13ec0d6381a4476ca098d190c3111d8c",
+                        "id": "2.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "f7a5673cc8e84fa2bacdbc36b20bb069",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "positiveOptionAction": {
+                        "connection_id": "068ed6bdf9694e41ac9984326ca8c158",
+                        "id": "1.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "3090e902c99943689a73cf9c90850b2d",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "title": "Validar Comprob"
+                }
+            ]
+        },
+        {
             "id": "0e381f0ab0fa4959a42da320ed53c834",
             "type": "DELEGATE",
-            "position_x": 2064.272138701661,
-            "position_y": 397.05886945704776,
+            "position_x": 2224.399682058819,
+            "position_y": 259.49097483616526,
             "values": [
                 {
                     "title": "Pagos",
@@ -73,8 +117,8 @@
         {
             "id": "1d980049a03446da8525ac80957c8a69",
             "type": "RESOURCES",
-            "position_x": 915.6563493861491,
-            "position_y": 191.0041299576486,
+            "position_x": 1123.3238584982269,
+            "position_y": 131.35311261478543,
             "values": [
                 {
                     "mediaFileName": "WhatsApp Image 2025-09-01 at 08.37.59.jpeg",
@@ -85,29 +129,79 @@
             ]
         },
         {
+            "id": "1f679aeffb8b45d2b1ee314ad1b46a30",
+            "type": "MESSAGE",
+            "position_x": 1992.0079247397289,
+            "position_y": 1005.0437438752799,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "✅ {PROMESA_MENSAJE}\n🧾 Factura: {PROMESA_ID}\n⏳ Fecha límite: {PROMESA_FECHA}\n\nTu servicio quedará activo con esta promesa. ¡Gracias!",
+                    "title": "Confirmar Prome"
+                }
+            ]
+        },
+        {
+            "id": "26acc2abfd6a475e9fe0b0a60061f504",
+            "type": "DELEGATE",
+            "position_x": 1665.930776940488,
+            "position_y": 46.89987275085406,
+            "values": [
+                {
+                    "title": "Pagos",
+                    "transfer_channels": [
+                        {
+                            "campaign_to_transfer": null,
+                            "channel_account": "",
+                            "channel_id": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "id": "292e6b56982d411ca94fc9f63344b996",
             "type": "MESSAGE",
-            "position_x": 1266.3521345336333,
-            "position_y": 39.4760418809131,
+            "position_x": 1003.0053884904967,
+            "position_y": -135.2687137658462,
             "values": [
                 {
                     "fieldName": "ID",
                     "fieldType": "conversation",
-                    "fieldValidations": {
-                        "regex": "^[0-9]+[0-9 ]*$",
-                        "type": "Number"
-                    },
+                    "fieldValidations": "",
                     "isCaptureDataNode": true,
                     "message": "Por favor, ingrese el número de cédula del titular: {ID}",
-                    "title": "Consultar Factu"
+                    "title": "Consultar Ced"
+                }
+            ]
+        },
+        {
+            "id": "3090e902c99943689a73cf9c90850b2d",
+            "type": "MESSAGE",
+            "position_x": 1445.8096633370867,
+            "position_y": 1040.9115696068523,
+            "values": [
+                {
+                    "fieldName": "COMPROBANTE_URL",
+                    "fieldType": "conversation",
+                    "fieldValidations": {
+                        "regex": ".*\\.jpg.*",
+                        "type": "Image"
+                    },
+                    "isCaptureDataNode": true,
+                    "message": "Por favor enviar una *FOTO* de su comprobante de pago 📸 (QUE SEA LEGIBLE) ",
+                    "title": "Pedir Comproban"
                 }
             ]
         },
         {
             "id": "3278ff89982547e78197d4d2f9a161bd",
             "type": "RESOURCES",
-            "position_x": 1591.7866130765096,
-            "position_y": -231.39081757151774,
+            "position_x": 1515.8532440292756,
+            "position_y": -324.44348409130237,
             "values": [
                 {
                     "mediaFileName": "Video Promocional HCNET..mp4",
@@ -118,10 +212,93 @@
             ]
         },
         {
+            "id": "329565b6782b4eb380a634bd459aabd8",
+            "type": "DECISION",
+            "position_x": 1358.0062926330006,
+            "position_y": 542.3646955506456,
+            "values": [
+                {
+                    "conditionalActions": [
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "1",
+                            "relationalOperator": "EQUAL_TO",
+                            "source": "SELECCION_SERVICIO"
+                        },
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "2",
+                            "relationalOperator": "EQUAL_TO",
+                            "source": "SELECCION_SERVICIO"
+                        },
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "3",
+                            "relationalOperator": "EQUAL_TO",
+                            "source": "SELECCION_SERVICIO"
+                        },
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "4",
+                            "relationalOperator": "EQUAL_TO",
+                            "source": "SELECCION_SERVICIO"
+                        },
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "5",
+                            "relationalOperator": "EQUAL_TO",
+                            "source": "SELECCION_SERVICIO"
+                        }
+                    ],
+                    "logicalOperator": "OR",
+                    "negativeOptionAction": {
+                        "connection_id": "e264bf4aad8d4d6bb0d461c27ab580a2",
+                        "id": "2.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "a6e329df97714576a578df357a13e1b5",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "positiveOptionAction": {
+                        "connection_id": "b8de33499c6b4cc58f0c507eb21dc14b",
+                        "id": "1.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "f0cebb4e77bb428a9201d8181aa00ed9",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "title": "Validar selecci"
+                }
+            ]
+        },
+        {
+            "id": "331d829cd7744bc5b8cf36f2081e08c0",
+            "type": "DELEGATE",
+            "position_x": 2512.0723797672144,
+            "position_y": 512.3646955506456,
+            "values": [
+                {
+                    "title": "Pago",
+                    "transfer_channels": [
+                        {
+                            "campaign_to_transfer": null,
+                            "channel_account": "",
+                            "channel_id": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "id": "3d40db2dddd74b009900682725315679",
             "type": "RESOURCES",
-            "position_x": 1208.2721387016609,
-            "position_y": 315.05886945704776,
+            "position_x": 1403.075437055504,
+            "position_y": 180.17244838122429,
             "values": [
                 {
                     "mediaFileName": "WhatsApp Image 2025-09-01 at 08.38.10.jpeg",
@@ -134,8 +311,8 @@
         {
             "id": "40caa3ba5bbe457ca089efcde949add5",
             "type": "DELEGATE",
-            "position_x": 1468.9989154366244,
-            "position_y": -626.3993571424028,
+            "position_x": 1284.284458353136,
+            "position_y": -710.2553220160303,
             "values": [
                 {
                     "title": "Servicio al cli",
@@ -150,10 +327,172 @@
             ]
         },
         {
+            "id": "4362f974902d498f992911fd8b603632",
+            "type": "MESSAGE",
+            "position_x": 226.4442676262966,
+            "position_y": 411.14806816088094,
+            "values": [
+                {
+                    "fieldName": "ID",
+                    "fieldType": "conversation",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": true,
+                    "message": "Por favor, ingrese el número de cédula del titular: {ID_TMP}",
+                    "title": "Consultar Ced."
+                }
+            ]
+        },
+        {
+            "id": "499c7856f499411db30f360b55299409",
+            "type": "REST",
+            "position_x": 1952.596433769769,
+            "position_y": 504.39406761029625,
+            "values": [
+                {
+                    "failed_response": {
+                        "connection_id": "ed2b7a7bd29e4717b0b5cff5e946ac0e",
+                        "id": "2.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "aba242d403334fbe9dc62d1eeadecc6b",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "request_data": {
+                        "body": "{\n  \"cedula\": \"\u003cID\u003e\",\n  \"dias\": 3,\n  \"descripcion\": \"Comprobante recibido via Hibot\",\n  \"seleccion\": \"\u003cSELECCION_SERVICIO\u003e\"\n}\n",
+                        "has_bearer": false,
+                        "headers": [
+                            {
+                                "id": "f050c94a894a4cdf943c1c9e80f5079e",
+                                "key": "Content-Type",
+                                "value": {
+                                    "reference": "application/json",
+                                    "variable": null
+                                }
+                            }
+                        ],
+                        "method": "POST",
+                        "query_params": [],
+                        "url": "https://hibot-mikrowisp.onrender.com/api/promesa-pago"
+                    },
+                    "response_vars_to_store": [
+                        {
+                            "id": "c435ff7c3e5b4d83877237d96009b03d",
+                            "key": "PROMESA_MENSAJE",
+                            "name": "mensaje",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "bd5e637432af40e5860b40530270de0a",
+                            "key": "PROMESA_FECHA",
+                            "name": "fechalimite",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "7b8717be7f2841b0b2290fc8c58483bd",
+                            "key": "PROMESA_ID",
+                            "name": "idfactura",
+                            "type": "CONVERSATION"
+                        }
+                    ],
+                    "success_response": {
+                        "connection_id": "297bbeddf9db41099fb0418c5f145e4c",
+                        "id": "1.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "915ef433c77a4245a2d18f2acf9efb0e",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "title": "Registrar Promesa de Pago"
+                }
+            ]
+        },
+        {
+            "id": "562622326cf94fb3a65b23775eb5d229",
+            "type": "REST",
+            "position_x": 1680.0519828292047,
+            "position_y": 1022.9776567410661,
+            "values": [
+                {
+                    "failed_response": {
+                        "connection_id": "2878c9aa5d28486fb361778bcd697606",
+                        "id": "2.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "b66faad284c544eda63678e7b9853847",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "request_data": {
+                        "body": "{\n  \"cedula\": \"\u003cID\u003e\",\n  \"dias\": 3,\n  \"descripcion\": \"Comprobante recibido via Hibot\"\n}",
+                        "has_bearer": false,
+                        "headers": [
+                            {
+                                "id": "a5c4999f73d14535a338374bf0958b96",
+                                "key": "Content-Type",
+                                "value": {
+                                    "reference": "application/json",
+                                    "variable": null
+                                }
+                            }
+                        ],
+                        "method": "POST",
+                        "query_params": [],
+                        "url": "https://hibot-mikrowisp.onrender.com/api/promesa-pago"
+                    },
+                    "response_vars_to_store": [
+                        {
+                            "id": "e47705ae6e8c41aca62e2a14dcbb8949",
+                            "key": "PROMESA_MENSAJE",
+                            "name": "mensaje",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "510611755ba4411eacdf513ca251b79c",
+                            "key": "PROMESA_FECHA",
+                            "name": "fechalimite",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "3cb762828fa540828b0d4443035923b2",
+                            "key": "PROMESA_ID",
+                            "name": "idfactura",
+                            "type": "CONVERSATION"
+                        }
+                    ],
+                    "success_response": {
+                        "connection_id": "78a492a8db4047dfb6694d53f8794c5e",
+                        "id": "1.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "1f679aeffb8b45d2b1ee314ad1b46a30",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "title": "Registrar Promesa de Pago"
+                }
+            ]
+        },
+        {
+            "id": "6971e5ac661c4d4a89a81b486895e0e9",
+            "type": "DELEGATE",
+            "position_x": 1745.8096633370867,
+            "position_y": 1244.9335986515903,
+            "values": [
+                {
+                    "title": "pago",
+                    "transfer_channels": [
+                        {
+                            "campaign_to_transfer": null,
+                            "channel_account": "",
+                            "channel_id": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "id": "702cc2a67e7347f2b210c9ce1b4b68f1",
             "type": "MESSAGE",
-            "position_x": 1246.3430053038826,
-            "position_y": -569.8061206541652,
+            "position_x": 936.4375651226114,
+            "position_y": -610.4875941992243,
             "values": [
                 {
                     "fieldName": "",
@@ -168,8 +507,8 @@
         {
             "id": "712b8c3ef66b449283cb5b187e5a437b",
             "type": "RESOURCES",
-            "position_x": 1764.2721387016609,
-            "position_y": 397.05886945704776,
+            "position_x": 1926.7486647159556,
+            "position_y": 241.11978186143972,
             "values": [
                 {
                     "mediaFileName": "WhatsApp Video 2025-09-01 at 09.00.17.mp4",
@@ -182,8 +521,8 @@
         {
             "id": "71c0848032404b9ea07cca4a520bf1c2",
             "type": "DELEGATE",
-            "position_x": 1581.4345350340793,
-            "position_y": -456.01462268416907,
+            "position_x": 1505.1686750989231,
+            "position_y": -548.2417805325222,
             "values": [
                 {
                     "title": "Soporte Técnico",
@@ -198,10 +537,29 @@
             ]
         },
         {
+            "id": "77a378931e1246b2a5a6ad8b8891af16",
+            "type": "MESSAGE",
+            "position_x": 1156.0062926330006,
+            "position_y": 672.3646955506456,
+            "values": [
+                {
+                    "fieldName": "SELECCION_SERVICIO",
+                    "fieldType": "conversation",
+                    "fieldValidations": {
+                        "regex": "^[0-9]+[0-9 ]*$",
+                        "type": "Number"
+                    },
+                    "isCaptureDataNode": true,
+                    "message": "Encontré {VARIOS_SERVICIOS} servicios a su nombre:\n{SERVICIOS_LISTA}\n\n✍️ Escriba el **NUMERO** de la línea que desea pagar/activar.",
+                    "title": "Elegir servicio"
+                }
+            ]
+        },
+        {
             "id": "7d832781c13c437db52fea8823fabd90",
             "type": "RESOURCES",
-            "position_x": 1508.2721387016609,
-            "position_y": 315.05886945704776,
+            "position_x": 1679.695998196171,
+            "position_y": 230.64325584714493,
             "values": [
                 {
                     "mediaFileName": "WhatsApp Video 2025-09-01 at 08.38.15.mp4",
@@ -219,33 +577,188 @@
             "values": []
         },
         {
-            "id": "8763e9ae1ad54633b34c747994874f29",
-            "type": "DELEGATE",
-            "position_x": 1852.3946080242317,
-            "position_y": 182.7968825913158,
+            "id": "8c2ea3b974914c83aa187f6163b85f73",
+            "type": "REST",
+            "position_x": 188.35350991022312,
+            "position_y": 947.1180437709415,
             "values": [
                 {
-                    "title": "PAGOS",
-                    "transfer_channels": [
+                    "failed_response": {
+                        "connection_id": "a5bcdc7a3b554a69bad97ff1d86cce29",
+                        "id": "2.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "d5ca2eb62a13407f876598d2ee46ace0",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "request_data": {
+                        "body": "{ \"cedula\": \"\u003cID_TMP\u003e\" }",
+                        "has_bearer": false,
+                        "headers": [
+                            {
+                                "id": "aedd43a9ae8749f699157a01bd680954",
+                                "key": "Content-Type",
+                                "value": {
+                                    "reference": "application/json",
+                                    "variable": null
+                                }
+                            }
+                        ],
+                        "method": "POST",
+                        "query_params": [],
+                        "url": "https://hibot-mikrowisp.onrender.com/api/cliente-evaluar"
+                    },
+                    "response_vars_to_store": [
                         {
-                            "campaign_to_transfer": null,
-                            "channel_account": "",
-                            "channel_id": ""
+                            "id": "bf1592942eeb436b88227ede93cbe7ea",
+                            "key": "MENSAJE_ESTADO",
+                            "name": "mensaje",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "9c82aff3be374c4587d1274ce1ade1a1",
+                            "key": "Recomendacion",
+                            "name": "recomendacion",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "75efe1f546274aa49c3343adcb24c034",
+                            "key": "TIENE_DEUDA",
+                            "name": "tieneDeuda",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "8e725c30183f4e04a5f80f62c0d9d293",
+                            "key": "NOMBRE_CLIENTE",
+                            "name": "nombre",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "d5883ef084494ecab18e87ba92c9873f",
+                            "key": "TOTAL",
+                            "name": "total",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "634d7239e3f3432b89547b2a44290ecc",
+                            "key": "CORTE",
+                            "name": "corte",
+                            "type": "CONVERSATION"
+                        },
+                        {
+                            "id": "56813c6a82834d9c901f8f70e59d0fe2",
+                            "key": "VARIOS_SERVICIOS",
+                            "name": "variosServicios",
+                            "type": "CONVERSATION"
                         }
-                    ]
+                    ],
+                    "success_response": {
+                        "connection_id": "2033923f0a994642b486872f6844f13c",
+                        "id": "1.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "cf1531f489ce484ea0ac291f40978b86",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "title": "Consultar Cedula"
+                }
+            ]
+        },
+        {
+            "id": "915ef433c77a4245a2d18f2acf9efb0e",
+            "type": "MESSAGE",
+            "position_x": 2212.0723797672144,
+            "position_y": 512.3646955506456,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "{PROMESA_MENSAJE}\nFactura: {PROMESA_ID}\nFecha límite: {PROMESA_FECHA}",
+                    "title": "Confirmar Prome"
+                }
+            ]
+        },
+        {
+            "id": "a6e329df97714576a578df357a13e1b5",
+            "type": "MESSAGE",
+            "position_x": 1564.160495946166,
+            "position_y": 826.3279804760823,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "El número **{SELECCION_SERVICIO}** no es una opción válida.\nDebe ser un número entre 1 y {VARIOS_SERVICIOS}. Inténtelo de nuevo 👍",
+                    "title": "Reelegir_VA_SER"
+                }
+            ]
+        },
+        {
+            "id": "aba242d403334fbe9dc62d1eeadecc6b",
+            "type": "MESSAGE",
+            "position_x": 2212.0723797672144,
+            "position_y": 722.3646955506456,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "⚠️ No se ha podido validar su comprobante de pago, intentelo nuevamente.",
+                    "title": "Repite Promesa"
+                }
+            ]
+        },
+        {
+            "id": "b014c69d2912402caa9aaaaa35b6ebff",
+            "type": "DECISION",
+            "position_x": 863.0872371202336,
+            "position_y": 808.4556363836859,
+            "values": [
+                {
+                    "conditionalActions": [
+                        {
+                            "isParamReference": true,
+                            "paramReferenceSelect": "Parámetro",
+                            "reference": "1",
+                            "relationalOperator": "GREATER_THAN",
+                            "source": "VARIOS_SERVICIOS"
+                        }
+                    ],
+                    "logicalOperator": null,
+                    "negativeOptionAction": {
+                        "connection_id": "d912b317d21b4a52961d7f4003b0a368",
+                        "id": "2.",
+                        "node_type": "DECISION",
+                        "node_type_id": "0a9544c73fea46c1977b93dc35c263b0",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "positiveOptionAction": {
+                        "connection_id": "415e5578fc1949519f16f8fda9b8bf5d",
+                        "id": "1.",
+                        "node_type": "MESSAGE",
+                        "node_type_id": "77a378931e1246b2a5a6ad8b8891af16",
+                        "response_options": [],
+                        "text": ""
+                    },
+                    "title": "Decidir"
                 }
             ]
         },
         {
             "id": "b4d5b84a62fa4671bebf351410b9967c",
             "type": "LIST",
-            "position_x": 945.5921519248623,
-            "position_y": -526.4179726798498,
+            "position_x": 538.1854480754741,
+            "position_y": -405.4097267952426,
             "values": [
                 {
-                    "content": "📌 ¿En qué puedo ayudarte hoy? Elige una opción o describe tu consulta:",
+                    "content": "📌 ¿En qué podemos ayudarte hoy? Escoge una Opción:",
                     "footer": "",
-                    "header": "Servicios",
+                    "header": "HCNET SERVICIOS",
                     "header_type": "TEXT",
                     "mediaType": "INTERACTIVE",
                     "nameButton": "Ver Servicios",
@@ -273,15 +786,24 @@
                                 {
                                     "connection_id": "75441122d0514e8b8b05d0ec4a3dfe28",
                                     "description": "📈📌",
-                                    "id": "4.",
+                                    "id": "3.",
                                     "node_type": "RESOURCES",
                                     "node_type_id": "ce18c23f25f14961ad9c830d499201a5",
                                     "response_options": [],
                                     "text": "Planes y Promociones"
                                 },
                                 {
+                                    "connection_id": "2fd7e78fe1a543b4b963bcf94d0425fa",
+                                    "description": "💵💲",
+                                    "id": "4.",
+                                    "node_type": "MESSAGE",
+                                    "node_type_id": "4362f974902d498f992911fd8b603632",
+                                    "response_options": [],
+                                    "text": "Pagar Servicios"
+                                },
+                                {
                                     "connection_id": "7de426d757a94c7682b92f4d5644de57",
-                                    "description": "💰💳",
+                                    "description": "🪪💰",
                                     "id": "5.",
                                     "node_type": "MESSAGE",
                                     "node_type_id": "292e6b56982d411ca94fc9f63344b996",
@@ -290,7 +812,7 @@
                                 },
                                 {
                                     "connection_id": "a9cfa2e73ba842abbbe7bf5aaac06c4c",
-                                    "description": "💲💰",
+                                    "description": "💲💳",
                                     "id": "6.",
                                     "node_type": "RESOURCES",
                                     "node_type_id": "b96f41d74f344f2b8e319240cec9d65d",
@@ -307,10 +829,26 @@
             ]
         },
         {
+            "id": "b66faad284c544eda63678e7b9853847",
+            "type": "MESSAGE",
+            "position_x": 1980.0519828292047,
+            "position_y": 1232.977656741066,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "⚠️ No se ha podido validar su comprobante de pago, intentelo nuevamente.",
+                    "title": "Repite Promesa"
+                }
+            ]
+        },
+        {
             "id": "b96f41d74f344f2b8e319240cec9d65d",
             "type": "RESOURCES",
-            "position_x": 927.270040271545,
-            "position_y": -37.906401261480994,
+            "position_x": 879.6954843500878,
+            "position_y": 71.27180033032636,
             "values": [
                 {
                     "mediaFileName": "WhatsApp Image 2025-09-01 at 08.37.55.jpeg",
@@ -323,8 +861,8 @@
         {
             "id": "c18d8c15295248179b4ec5760d531dfd",
             "type": "MESSAGE",
-            "position_x": 1360.665066117612,
-            "position_y": -435.2637693051486,
+            "position_x": 1161.1251003626921,
+            "position_y": -472.9756990524037,
             "values": [
                 {
                     "fieldName": "",
@@ -339,8 +877,8 @@
         {
             "id": "c33e5a5822c94a128b5248851a7de040",
             "type": "MESSAGE",
-            "position_x": 1985.2611447042725,
-            "position_y": -355.77186914138565,
+            "position_x": 1984.0035306537236,
+            "position_y": -456.22618483809174,
             "values": [
                 {
                     "fieldName": "",
@@ -355,8 +893,8 @@
         {
             "id": "c71faef9808c4282b1b3a20dbb1f63e1",
             "type": "DELEGATE",
-            "position_x": 2192.665392727291,
-            "position_y": -456.88008765841,
+            "position_x": 2218.5822700053104,
+            "position_y": -474.15991202654766,
             "values": [
                 {
                     "title": "VENTAS",
@@ -373,8 +911,8 @@
         {
             "id": "ce18c23f25f14961ad9c830d499201a5",
             "type": "RESOURCES",
-            "position_x": 1314.7803767941427,
-            "position_y": -237.5224878962199,
+            "position_x": 1209.3844461655954,
+            "position_y": -293.60561061820044,
             "values": [
                 {
                     "mediaFileName": "WhatsApp Image 2025-09-01 at 08.33.04.jpeg",
@@ -385,10 +923,42 @@
             ]
         },
         {
+            "id": "cf1531f489ce484ea0ac291f40978b86",
+            "type": "MESSAGE",
+            "position_x": 462.0341148153291,
+            "position_y": 673.7363493393977,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "{MENSAJE_ESTADO}",
+                    "title": "Mostrar Estado"
+                }
+            ]
+        },
+        {
+            "id": "d5ca2eb62a13407f876598d2ee46ace0",
+            "type": "MESSAGE",
+            "position_x": 510.5958294023409,
+            "position_y": 1103.553216253469,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "⚠️ No existe un cliente registrado con esa cédula . Por favor verifique sus datos y vuelva a intentarlo./n\n",
+                    "title": "Repetir cédula"
+                }
+            ]
+        },
+        {
             "id": "e0fed2ed13e647b780500b44ac7a83dd",
             "type": "PAUSE",
-            "position_x": 1818.2065691800833,
-            "position_y": -332.5633779291037,
+            "position_x": 1795.3423584218485,
+            "position_y": -394.6687109686729,
             "values": [
                 {
                     "expired_at_hours": 0,
@@ -399,17 +969,70 @@
             ]
         },
         {
+            "id": "f0cebb4e77bb428a9201d8181aa00ed9",
+            "type": "MESSAGE",
+            "position_x": 1653.9181764540488,
+            "position_y": 532.291265401519,
+            "values": [
+                {
+                    "fieldName": "COMPROBANTE_URL",
+                    "fieldType": "conversation",
+                    "fieldValidations": {
+                        "regex": ".*\\.jpg.*",
+                        "type": "Image"
+                    },
+                    "isCaptureDataNode": true,
+                    "message": "Por favor enviar una *FOTO* de su comprobante de pago 📸 (QUE SEA LEGIBLE) ",
+                    "title": "Pedir Comproban"
+                }
+            ]
+        },
+        {
+            "id": "f2b9b79029e24b0a9031554c0b7be899",
+            "type": "DELEGATE",
+            "position_x": 2288.0226107695544,
+            "position_y": 999.0657729200179,
+            "values": [
+                {
+                    "title": "Pago",
+                    "transfer_channels": [
+                        {
+                            "campaign_to_transfer": null,
+                            "channel_account": "",
+                            "channel_id": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "f7a5673cc8e84fa2bacdbc36b20bb069",
+            "type": "MESSAGE",
+            "position_x": 1445.8096633370867,
+            "position_y": 1244.9335986515903,
+            "values": [
+                {
+                    "fieldName": "",
+                    "fieldType": "",
+                    "fieldValidations": "",
+                    "isCaptureDataNode": false,
+                    "message": "No tienes deudas pendientes ",
+                    "title": "finalizar compr"
+                }
+            ]
+        },
+        {
             "id": "fbd2cff6c39c464fae9a0721cf88a55c",
             "type": "REST",
-            "position_x": 1507.3044972514465,
-            "position_y": 76.67271490250101,
+            "position_x": 1275.930776940488,
+            "position_y": -73.10012724914594,
             "values": [
                 {
                     "failed_response": {
-                        "connection_id": "a028279f45ef40b2a10d5791883969b4",
+                        "connection_id": "41436975ceec4daabd74e513c20dc4e2",
                         "id": "2.",
                         "node_type": "DELEGATE",
-                        "node_type_id": "8763e9ae1ad54633b34c747994874f29",
+                        "node_type_id": "26acc2abfd6a475e9fe0b0a60061f504",
                         "response_options": [],
                         "text": ""
                     },
@@ -446,6 +1069,30 @@
     ],
     "connectors": [
         {
+            "id": "068ed6bdf9694e41ac9984326ca8c158",
+            "active": true,
+            "node_destination_id": "3090e902c99943689a73cf9c90850b2d",
+            "node_source_id": "0a9544c73fea46c1977b93dc35c263b0"
+        },
+        {
+            "id": "0c37273302d34a778bb11718d3dce3e3",
+            "active": true,
+            "node_destination_id": "b014c69d2912402caa9aaaaa35b6ebff",
+            "node_source_id": "cf1531f489ce484ea0ac291f40978b86"
+        },
+        {
+            "id": "0e8e66ab7da74c39ae8a8dad0d7b5aeb",
+            "active": true,
+            "node_destination_id": "f2b9b79029e24b0a9031554c0b7be899",
+            "node_source_id": "1f679aeffb8b45d2b1ee314ad1b46a30"
+        },
+        {
+            "id": "0f3806af45ea477dbc2abb04f1452218",
+            "active": true,
+            "node_destination_id": "329565b6782b4eb380a634bd459aabd8",
+            "node_source_id": "77a378931e1246b2a5a6ad8b8891af16"
+        },
+        {
             "id": "0fa1a452e8254cc6b771ecea9d1e26b9",
             "active": true,
             "node_destination_id": "40caa3ba5bbe457ca089efcde949add5",
@@ -456,6 +1103,48 @@
             "active": true,
             "node_destination_id": "c33e5a5822c94a128b5248851a7de040",
             "node_source_id": "e0fed2ed13e647b780500b44ac7a83dd"
+        },
+        {
+            "id": "13ec0d6381a4476ca098d190c3111d8c",
+            "active": true,
+            "node_destination_id": "f7a5673cc8e84fa2bacdbc36b20bb069",
+            "node_source_id": "0a9544c73fea46c1977b93dc35c263b0"
+        },
+        {
+            "id": "2033923f0a994642b486872f6844f13c",
+            "active": true,
+            "node_destination_id": "cf1531f489ce484ea0ac291f40978b86",
+            "node_source_id": "8c2ea3b974914c83aa187f6163b85f73"
+        },
+        {
+            "id": "2878c9aa5d28486fb361778bcd697606",
+            "active": true,
+            "node_destination_id": "b66faad284c544eda63678e7b9853847",
+            "node_source_id": "562622326cf94fb3a65b23775eb5d229"
+        },
+        {
+            "id": "290335dd49d047d9806d7e8515f4da3f",
+            "active": true,
+            "node_destination_id": "8c2ea3b974914c83aa187f6163b85f73",
+            "node_source_id": "4362f974902d498f992911fd8b603632"
+        },
+        {
+            "id": "297bbeddf9db41099fb0418c5f145e4c",
+            "active": true,
+            "node_destination_id": "915ef433c77a4245a2d18f2acf9efb0e",
+            "node_source_id": "499c7856f499411db30f360b55299409"
+        },
+        {
+            "id": "2fd7e78fe1a543b4b963bcf94d0425fa",
+            "active": true,
+            "node_destination_id": "4362f974902d498f992911fd8b603632",
+            "node_source_id": "b4d5b84a62fa4671bebf351410b9967c"
+        },
+        {
+            "id": "34f7c431e40646aaaf64c4bf120526b3",
+            "active": true,
+            "node_destination_id": "4362f974902d498f992911fd8b603632",
+            "node_source_id": "d5ca2eb62a13407f876598d2ee46ace0"
         },
         {
             "id": "35c7936176194016a6dd56c22cc52ece",
@@ -476,6 +1165,24 @@
             "node_source_id": "c33e5a5822c94a128b5248851a7de040"
         },
         {
+            "id": "41436975ceec4daabd74e513c20dc4e2",
+            "active": true,
+            "node_destination_id": "26acc2abfd6a475e9fe0b0a60061f504",
+            "node_source_id": "fbd2cff6c39c464fae9a0721cf88a55c"
+        },
+        {
+            "id": "415e5578fc1949519f16f8fda9b8bf5d",
+            "active": true,
+            "node_destination_id": "77a378931e1246b2a5a6ad8b8891af16",
+            "node_source_id": "b014c69d2912402caa9aaaaa35b6ebff"
+        },
+        {
+            "id": "426b6ba2841e4d67bc7a4d4f1d64f44d",
+            "active": true,
+            "node_destination_id": "562622326cf94fb3a65b23775eb5d229",
+            "node_source_id": "3090e902c99943689a73cf9c90850b2d"
+        },
+        {
             "id": "4c37f6d3be544fc8ada2a575e409e8e3",
             "active": true,
             "node_destination_id": "3d40db2dddd74b009900682725315679",
@@ -488,10 +1195,22 @@
             "node_source_id": "c18d8c15295248179b4ec5760d531dfd"
         },
         {
+            "id": "4e40434bcca2454aad036819fff8b0af",
+            "active": true,
+            "node_destination_id": "6971e5ac661c4d4a89a81b486895e0e9",
+            "node_source_id": "f7a5673cc8e84fa2bacdbc36b20bb069"
+        },
+        {
             "id": "5313599f2b1c44d9868135c37cae3846",
             "active": true,
             "node_destination_id": "712b8c3ef66b449283cb5b187e5a437b",
             "node_source_id": "7d832781c13c437db52fea8823fabd90"
+        },
+        {
+            "id": "541c6509d04a449ca70d8353a548d8d5",
+            "active": true,
+            "node_destination_id": "77a378931e1246b2a5a6ad8b8891af16",
+            "node_source_id": "a6e329df97714576a578df357a13e1b5"
         },
         {
             "id": "6ff3287e38254fd7a77fd862b1c5218d",
@@ -504,6 +1223,12 @@
             "active": true,
             "node_destination_id": "ce18c23f25f14961ad9c830d499201a5",
             "node_source_id": "b4d5b84a62fa4671bebf351410b9967c"
+        },
+        {
+            "id": "78a492a8db4047dfb6694d53f8794c5e",
+            "active": true,
+            "node_destination_id": "1f679aeffb8b45d2b1ee314ad1b46a30",
+            "node_source_id": "562622326cf94fb3a65b23775eb5d229"
         },
         {
             "id": "7d2f483d40994457a579ff1bc8646c14",
@@ -524,10 +1249,10 @@
             "node_source_id": "3278ff89982547e78197d4d2f9a161bd"
         },
         {
-            "id": "a028279f45ef40b2a10d5791883969b4",
+            "id": "a5bcdc7a3b554a69bad97ff1d86cce29",
             "active": true,
-            "node_destination_id": "8763e9ae1ad54633b34c747994874f29",
-            "node_source_id": "fbd2cff6c39c464fae9a0721cf88a55c"
+            "node_destination_id": "d5ca2eb62a13407f876598d2ee46ace0",
+            "node_source_id": "8c2ea3b974914c83aa187f6163b85f73"
         },
         {
             "id": "a9cfa2e73ba842abbbe7bf5aaac06c4c",
@@ -548,10 +1273,52 @@
             "node_source_id": "3d40db2dddd74b009900682725315679"
         },
         {
+            "id": "b8de33499c6b4cc58f0c507eb21dc14b",
+            "active": true,
+            "node_destination_id": "f0cebb4e77bb428a9201d8181aa00ed9",
+            "node_source_id": "329565b6782b4eb380a634bd459aabd8"
+        },
+        {
+            "id": "c22547cdf3a04056b122c7d2071103fd",
+            "active": true,
+            "node_destination_id": "4362f974902d498f992911fd8b603632",
+            "node_source_id": "b66faad284c544eda63678e7b9853847"
+        },
+        {
+            "id": "c9e26d8dd4a9440d8547d2299267d120",
+            "active": true,
+            "node_destination_id": "499c7856f499411db30f360b55299409",
+            "node_source_id": "f0cebb4e77bb428a9201d8181aa00ed9"
+        },
+        {
             "id": "cd43ed0918374aae84ebe151fb673d9b",
             "active": true,
             "node_destination_id": "0369aa3f1c724cd590ba8d7959cdcf9a",
             "node_source_id": "fbd2cff6c39c464fae9a0721cf88a55c"
+        },
+        {
+            "id": "d912b317d21b4a52961d7f4003b0a368",
+            "active": true,
+            "node_destination_id": "0a9544c73fea46c1977b93dc35c263b0",
+            "node_source_id": "b014c69d2912402caa9aaaaa35b6ebff"
+        },
+        {
+            "id": "e264bf4aad8d4d6bb0d461c27ab580a2",
+            "active": true,
+            "node_destination_id": "a6e329df97714576a578df357a13e1b5",
+            "node_source_id": "329565b6782b4eb380a634bd459aabd8"
+        },
+        {
+            "id": "ec2784040ab04953816e193fe023a6d1",
+            "active": true,
+            "node_destination_id": "331d829cd7744bc5b8cf36f2081e08c0",
+            "node_source_id": "915ef433c77a4245a2d18f2acf9efb0e"
+        },
+        {
+            "id": "ed2b7a7bd29e4717b0b5cff5e946ac0e",
+            "active": true,
+            "node_destination_id": "aba242d403334fbe9dc62d1eeadecc6b",
+            "node_source_id": "499c7856f499411db30f360b55299409"
         },
         {
             "id": "f68b95c6c5cc42f4b7f7ba0f61ee7905",
@@ -564,6 +1331,12 @@
             "active": true,
             "node_destination_id": "b4d5b84a62fa4671bebf351410b9967c",
             "node_source_id": "80ab68bd50944b0990c3c977a074296f"
+        },
+        {
+            "id": "fcc3104e89ae4eb7a1226933b35f4259",
+            "active": true,
+            "node_destination_id": "4362f974902d498f992911fd8b603632",
+            "node_source_id": "aba242d403334fbe9dc62d1eeadecc6b"
         }
     ]
 }
