@@ -36,14 +36,23 @@ app.all('/api/limpiar-id', (req, res) => {
 
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body || {};
-  if (!cedula) return bad(res, 'Cédula no proporcionada');
+  if (!cedula) return bad(res, 'Cédula no proporcionada'); // 400 por defecto
+
   try {
     const datos = await mikrowisp.consultarClientePorCedula(cedula);
+
+    // >>> aquí forzamos 400 si no existe el cliente
+    if (datos && datos.notFound === true) {
+      return bad(res, datos.mensaje || 'Cliente no encontrado'); // 400
+    }
+
+    // resto de casos: 200 normal con el cuerpo que ya usas en el flujo
     return res.json(datos);
   } catch (e) {
     return bad(res, 'Error interno consultando cliente', 500);
   }
 });
+
 
 // === NUEVO: Datos RAW de MikroWisp ===
 app.get('/api/cliente/raw', async (req, res) => {

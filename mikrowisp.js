@@ -297,6 +297,7 @@ async function evaluarClientePorCedula(cedula) {
     // Nada útil
     if ((activos_suspendidos.length === 0 && retirados.length > 0) || clientes.length === 0) {
       return {
+         notFound: true,
         tieneDeuda: false,
         variosServicios: 0,
         recomendacion: 'cerrar',
