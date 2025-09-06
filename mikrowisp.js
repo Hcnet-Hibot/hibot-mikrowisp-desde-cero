@@ -383,26 +383,17 @@ async function evaluarClientePorCedula(cedula) {
         vencFmt = r.vencFmt || null;
         corteStr = r.corteStr || null;
       }
-
-      const lineas = [];
-for (let i = 0; i < servicios.length; i++) {
-  const n = `*${i + 1}*`;
-  const pref = `${n}. `;
-  // ...mismo bloque condicional, usando pref al inicio de cada linea
-  lineas.push(linea);
-}
-const SERVICIOS_LISTA = lineas.join('\n\n');
-
+      
 
       if (estado === 'SUSPENDIDO') {
         linea =
-          `${pref} 🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
+          `🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
                  (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
       } else if (!conDeuda) {
-        linea = `${pref} 🌟 *${nombre}*, su servicio está ACTIVO ✅ y no tiene facturas pendientes.`;
+        linea = `🌟 *${nombre}*, su servicio está ACTIVO ✅ y no tiene facturas pendientes.`;
       } else {
         linea =
-          `${pref} ⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳` +
+          `⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳` +
           (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
       }
 
