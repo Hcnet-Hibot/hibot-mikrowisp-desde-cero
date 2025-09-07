@@ -323,11 +323,8 @@ async function evaluarClientePorCedula(cedula) {
         // Suspensión implica deuda
         tieneDeuda = true;
         mensaje =
-          `🚫 Estimado/a *${nombre}*, su servicio está SUSPENDIDO por falta de pago.\n` +
-          `💵 Total pendiente: $${totalStr}.\n` +
-          (vencFmt ? `📅 Vencimiento: ${vencFmt}\n` : '') +
-          (corteStr ? `⛔ Corte: ${corteStr}\n` : '') +
-          `Si ya realizó su pago, por favor envíe su comprobante.`;
+          `🚫 Estimado/a cliente *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
         return {
           nombre, estado, total: totalStr, facturasPendientes: factNoPag,
           vencimiento: vencFmt || null, corte: corteStr || null,
