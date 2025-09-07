@@ -346,10 +346,8 @@ async function evaluarClientePorCedula(cedula) {
         };
       } else {
         mensaje =
-          `⚠️ Estimado/a *${nombre}*, ya se encuentra disponible su factura. ` +
-          `💵 Total: $${totalStr}.\n` +
-          (vencFmt ? `📅 Vencimiento: ${vencFmt}\n` : '') +
-          (corteStr ? `⛔ Corte: ${corteStr}\n` : '');
+          `⚠️ Estimado/a cliente*${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
         return {
           nombre, estado, total: totalStr, facturasPendientes: factNoPag,
           vencimiento: vencFmt || null, corte: corteStr || null,
