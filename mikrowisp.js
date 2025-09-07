@@ -192,7 +192,7 @@ async function consultarClientePorCedula(cedula) {
     const activos_suspendidos = [...activos, ...suspendidos];
 
     if ((activos_suspendidos.length === 0 && retirados.length > 0) || clientes.length === 0) {
-      return { mensaje: '❗No existe un cliente registrado con esa cédula. Por favor verifique sus datos. Si cree que esto es un error, contáctenos.' };
+      return { notFound: true };
     }
 
     // Un solo servicio

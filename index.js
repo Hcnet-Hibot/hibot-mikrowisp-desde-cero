@@ -36,30 +36,26 @@ app.all('/api/limpiar-id', (req, res) => {
 
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body || {};
-  if (!cedula || !String(cedula).trim()) {
-    return bad(res, 'Cédula no proporcionada', 400);
+  const ced = String(cedula || '').trim();
+
+  if (!ced) {
+    return res.status(400).json({ error: 'CEDULA_VACIA' });
   }
 
   try {
-    const datos = await mikrowisp.consultarClientePorCedula(String(cedula).trim());
+    const datos = await mikrowisp.consultarClientePorCedula(ced);
 
-    // 👇 CLAVE: si el backend de lógica devuelve el texto "no existe un cliente",
-    // cambiamos el status a 400 para que Easyflow tome la rama de error.
-    if (
-      datos &&
-      typeof datos === 'object' &&
-      typeof datos.mensaje === 'string' &&
-      /no existe un cliente/i.test(datos.mensaje)
-    ) {
-      return res.status(400).json(datos);
+    if (datos?.notFound) {
+      // 👉 Easyflow tomará la rama 400 y mostrará TU nodo "Repetir cédula"
+      return res.status(400).json({ error: 'CLIENTE_NO_ENCONTRADO' });
     }
 
-    // Caso normal (cliente encontrado / estados, etc.)
-    return res.json(datos);
+    // ✅ Válido: seguirás recibiendo { mensaje: ... } con ACTIVO/SUSPENDIDO o listado
+    return res.status(200).json(datos);
 
   } catch (e) {
-    // Errores reales del servidor o de la integración
-    return bad(res, 'Error interno consultando cliente', 500);
+    console.error('Error consultando cliente:', e);
+    return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });
 
