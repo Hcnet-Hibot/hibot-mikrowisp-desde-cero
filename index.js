@@ -152,15 +152,24 @@ app.post('/api/cliente-evaluar', async (req, res) => {
       try { payload = JSON.parse(payload); } catch (_) { payload = {}; }
     }
     if (!payload || Object.keys(payload).length === 0) payload = req.query || {};
+
     const { cedula } = payload || {};
     if (!cedula) return bad(res, 'Cédula no proporcionada');
 
     const r = await mikrowisp.evaluarClientePorCedula(cedula);
+
+    // ⬇️ Clave: si no hay cliente, devolver 400 para que el flujo vaya a tu "Repetir cédula"
+    if (r?.notFound) {
+      return res.status(400).json({ error: 'CLIENTE_NO_ENCONTRADO', ...r });
+    }
+
+    // Si existe, 200 con todas las variables para mapear
     return ok(res, r);
   } catch (e) {
     return bad(res, e.response?.data || e.message, 500);
   }
 });
+
 
 // === Crear Promesa de Pago por cédula (3 días por defecto)
 app.post(
