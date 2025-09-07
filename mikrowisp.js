@@ -336,7 +336,7 @@ async function evaluarClientePorCedula(cedula) {
 
       // ACTIVO
       if (!tieneDeuda) {
-        mensaje = `🌟 Estimado/a *${nombre}*, su servicio está ACTIVO ✅ y no tiene facturas pendientes. ¡Gracias por confiar en nosotros!`;
+        mensaje = `🌟 Estimado/a cliente *${nombre}*, su servicio se encuentra activo ✅ y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`;
         return {
           nombre, estado, total: '0.00', facturasPendientes: 0,
           vencimiento: null, corte: null,
