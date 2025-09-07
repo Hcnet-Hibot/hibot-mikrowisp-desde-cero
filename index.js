@@ -12,54 +12,74 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Helpers
-function bad(res, msg, code = 400) { return res.status(code).json({ estado: 'error', mensaje: msg }); }
-function ok(res, data = {}) { return res.json({ estado: 'exito', ...data }); }
+function bad(res, msg, code = 400) {
+  return res.status(code).json({ estado: 'error', mensaje: msg });
+}
+function ok(res, data = {}) {
+  return res.json({ estado: 'exito', ...data });
+}
 
-// === Consulta por cédula (GET/POST) ===
+/* -------------------------
+ *  CONSULTAS POR CÉDULA
+ * ------------------------- */
+
+// GET informativo (devuelve 200 siempre; si no hay cliente vendrá notFound:true)
 app.get('/api/cliente', async (req, res) => {
   const { cedula } = req.query;
   if (!cedula) return bad(res, 'Cédula no proporcionada');
   try {
     const datos = await mikrowisp.consultarClientePorCedula(cedula);
-    // Para compatibilidad, GET devuelve 200 siempre con el objeto (usa notFound si procede)
     return res.json(datos);
   } catch (e) {
     return bad(res, 'Error interno consultando cliente', 500);
   }
 });
 
-// === Limpiar variable de cédula (Hibot) ===
-app.all('/api/limpiar-id', (_req, res) => {
-  return res.json({ id: '', ID: '' });
-});
-
-// === Consulta por cédula (POST) para ramificar en Easyflow (200/400) ===
+// POST para ramificar en Easyflow con 200/400
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body || {};
   const ced = String(cedula || '').trim();
-
-  if (!ced) {
-    return res.status(400).json({ error: 'CEDULA_VACIA' });
-  }
+  if (!ced) return res.status(400).json({ error: 'CEDULA_VACIA' });
 
   try {
     const datos = await mikrowisp.consultarClientePorCedula(ced);
-
     if (datos?.notFound) {
-      // 👉 Easyflow tomará la rama 400 y mostrará TU nodo "Repetir cédula"
+      // Ruta clara de error para que tu flujo vaya al nodo "Repetir cédula"
       return res.status(400).json({ error: 'CLIENTE_NO_ENCONTRADO' });
     }
-
-    // ✅ Válido: seguirás recibiendo { mensaje: ... } con ACTIVO/SUSPENDIDO o listado
     return res.status(200).json(datos);
-
   } catch (e) {
     console.error('Error consultando cliente:', e);
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });
 
-// === NUEVO: Datos RAW de MikroWisp ===
+// Evaluación estructurada para mapear variables en el flujo
+app.post('/api/cliente-evaluar', async (req, res) => {
+  try {
+    let payload = req.body;
+    if (typeof payload === 'string') {
+      try { payload = JSON.parse(payload); } catch { payload = {}; }
+    }
+    if (!payload || Object.keys(payload).length === 0) payload = req.query || {};
+
+    const { cedula } = payload || {};
+    if (!cedula) return bad(res, 'Cédula no proporcionada');
+
+    const r = await mikrowisp.evaluarClientePorCedula(cedula);
+
+    // Si no hay cliente -> 400 para que caiga a tu rama de error en Easyflow
+    if (r?.notFound) {
+      return res.status(400).json({ error: 'CLIENTE_NO_ENCONTRADO', ...r });
+    }
+    // Si existe -> 200 con todas las variables (mensaje, variosServiciosValidos, serviciosTexto, etc.)
+    return ok(res, r);
+  } catch (e) {
+    return bad(res, e.response?.data || e.message, 500);
+  }
+});
+
+// Datos RAW (para debug)
 app.get('/api/cliente/raw', async (req, res) => {
   const { cedula } = req.query;
   if (!cedula) return bad(res, 'Cédula no proporcionada');
@@ -71,33 +91,44 @@ app.get('/api/cliente/raw', async (req, res) => {
   }
 });
 
-// === Enviar imagen ===
+/* -------------------------
+ *  UTILIDADES MENSAJERÍA
+ * ------------------------- */
+
 app.post('/api/enviar-imagen', async (req, res) => {
   const { numero, url } = req.body || {};
   const recipient = limpiarNumeroEcuador(numero);
   if (!recipient || !url) return bad(res, 'Falta el número (formato EC) o la URL de la imagen');
   try {
-    const r = await hibot.enviarMensajeHibot({ recipient, media: url, mediaType: 'IMAGE', mediaFileName: 'imagen.jpg' });
+    const r = await hibot.enviarMensajeHibot({
+      recipient,
+      media: url,
+      mediaType: 'IMAGE',
+      mediaFileName: 'imagen.jpg'
+    });
     return ok(res, { respuesta: r });
   } catch (e) {
     return bad(res, e.response?.data || e.message, 500);
   }
 });
 
-// === Enviar sticker ===
 app.post('/api/enviar-sticker', async (req, res) => {
   const { numero, url } = req.body || {};
   const recipient = limpiarNumeroEcuador(numero);
   if (!recipient || !url) return bad(res, 'Falta el número (formato EC) o la URL del sticker');
   try {
-    const r = await hibot.enviarMensajeHibot({ recipient, media: url, mediaType: 'STICKER', mediaFileName: 'sticker.webp' });
+    const r = await hibot.enviarMensajeHibot({
+      recipient,
+      media: url,
+      mediaType: 'STICKER',
+      mediaFileName: 'sticker.webp'
+    });
     return ok(res, { respuesta: r });
   } catch (e) {
     return bad(res, e.response?.data || e.message, 500);
   }
 });
 
-// === Enviar texto ===
 app.post('/api/enviar-texto', async (req, res) => {
   const { numero, texto } = req.body || {};
   const recipient = limpiarNumeroEcuador(numero);
@@ -110,7 +141,7 @@ app.post('/api/enviar-texto', async (req, res) => {
   }
 });
 
-// === Consulta y envía al número recibido (mejorado)
+// Consulta + envío del mensaje generado
 app.post('/api/cliente-enviar', async (req, res) => {
   const { cedula, numero } = req.body || {};
   const recipient = limpiarNumeroEcuador(numero);
@@ -124,54 +155,11 @@ app.post('/api/cliente-enviar', async (req, res) => {
   }
 });
 
-// === Probar cálculo de CORTE desde una idfactura (usa GetInvoice)
-app.get('/api/factura-corte', async (req, res) => {
-  try {
-    const { idfactura } = req.query;
-    if (!idfactura) {
-      return res.status(400).json({ estado: 'error', mensaje: 'Falta idfactura' });
-    }
-    const factura = await mikrowisp.obtenerFacturaPorId(idfactura);
-    const vencimiento = factura.vencimiento; // "YYYY-MM-DD" según documentación
-    const fecha_corte = mikrowisp.calcularFechaCorteDesdeVencimientoStr(vencimiento);
-    return res.json({
-      estado: 'exito',
-      factura: { id: factura.id, total: factura.total, estado: factura.estado, vencimiento },
-      fecha_corte
-    });
-  } catch (e) {
-    return res.status(500).json({ estado: 'error', mensaje: e.response?.data || e.message });
-  }
-});
+/* -------------------------
+ *  PROMESA DE PAGO
+ * ------------------------- */
 
-// === Evaluación estructurada para ramificar el flujo
-app.post('/api/cliente-evaluar', async (req, res) => {
-  try {
-    let payload = req.body;
-    if (typeof payload === 'string') {
-      try { payload = JSON.parse(payload); } catch (_) { payload = {}; }
-    }
-    if (!payload || Object.keys(payload).length === 0) payload = req.query || {};
-
-    const { cedula } = payload || {};
-    if (!cedula) return bad(res, 'Cédula no proporcionada');
-
-    const r = await mikrowisp.evaluarClientePorCedula(cedula);
-
-    // ⬇️ Clave: si no hay cliente, devolver 400 para que el flujo vaya a tu "Repetir cédula"
-    if (r?.notFound) {
-      return res.status(400).json({ error: 'CLIENTE_NO_ENCONTRADO', ...r });
-    }
-
-    // Si existe, 200 con todas las variables para mapear
-    return ok(res, r);
-  } catch (e) {
-    return bad(res, e.response?.data || e.message, 500);
-  }
-});
-
-
-// === Crear Promesa de Pago por cédula (3 días por defecto)
+// Acepta JSON, x-www-form-urlencoded, multipart/form-data (sin archivos) y text/plain (JSON)
 app.post(
   '/api/promesa-pago',
   upload.none(),
@@ -180,31 +168,53 @@ app.post(
     try {
       // Normalizar payload
       let payload = req.body;
-
       if (typeof payload === 'string') {
-        try { payload = JSON.parse(payload); } catch (_) { payload = {}; }
+        try { payload = JSON.parse(payload); } catch { payload = {}; }
       }
-      if (!payload || Object.keys(payload).length === 0) {
-        payload = req.query || {};
-      }
+      if (!payload || Object.keys(payload).length === 0) payload = req.query || {};
 
-      const { cedula, dias = 3, descripcion } = payload || {};
+      const { cedula, dias = 3, descripcion, seleccion } = payload || {};
       if (!cedula) return bad(res, 'Cédula no proporcionada');
 
       // 1) Traer servicios del cliente
       const clientes = await mikrowisp.consultarClientePorCedulaRaw(cedula);
+
+      // Misma lógica/orden que usa evaluarClientePorCedula:
       const activos = clientes.filter(c => (c.estado || '').toUpperCase() === 'ACTIVO');
       const suspendidos = clientes.filter(c => (c.estado || '').toUpperCase() === 'SUSPENDIDO');
-      const candidatos = [...suspendidos, ...activos]; // priorizamos suspendidos
+      const activos_suspendidos = [...activos, ...suspendidos];
 
-      if (candidatos.length === 0) {
+      if (activos_suspendidos.length === 0) {
         return bad(res, 'No se encontraron servicios activos o suspendidos para esa cédula', 404);
       }
 
-      // Tomar el primer servicio con deuda si es posible
-      let servicioObjetivo = candidatos.find(c => Number(c?.facturacion?.facturas_nopagadas || 0) > 0) || candidatos[0];
+      // "Válidos": suspendidos o con deuda (coincide con la lista que ve el usuario)
+      const validos = activos_suspendidos.filter(c => {
+        const estado = (c.estado || '').toUpperCase();
+        const nopag = Number(c?.facturacion?.facturas_nopagadas || 0);
+        const total = Number(c?.facturacion?.total_facturas || 0);
+        const conDeuda = nopag > 0 && total > 0;
+        return estado === 'SUSPENDIDO' || conDeuda;
+      });
 
-      // 2) Buscar facturas NO PAGADAS del servicio
+      // 2) Seleccionar el servicio objetivo:
+      let servicioObjetivo = null;
+
+      // a) Si el flujo envió "seleccion" (1-based) y es válida -> tomar ese
+      const selN = parseInt(seleccion, 10);
+      if (Number.isInteger(selN) && selN >= 1 && selN <= validos.length) {
+        servicioObjetivo = validos[selN - 1];
+      }
+
+      // b) Si no vino seleccion válida -> primer válido; si no hay, primer candidato
+      if (!servicioObjetivo) {
+        servicioObjetivo =
+          validos[0] ||
+          activos_suspendidos.find(c => Number(c?.facturacion?.facturas_nopagadas || 0) > 0) ||
+          activos_suspendidos[0];
+      }
+
+      // 3) Buscar facturas NO PAGADAS del servicio seleccionado
       const idcliente =
         servicioObjetivo?.idcliente ??
         servicioObjetivo?.idCliente ??
@@ -219,14 +229,14 @@ app.post(
         return bad(res, 'El cliente no tiene facturas no pagadas para registrar promesa', 409);
       }
 
-      // Elegir factura con vencimiento más cercano
-      const sel = [...facturasNoPagadas].sort((a, b) => {
+      // Elegir la factura con vencimiento más cercano
+      const selFactura = [...facturasNoPagadas].sort((a, b) => {
         const va = (a?.vencimiento || '');
         const vb = (b?.vencimiento || '');
         return va.localeCompare(vb);
       })[0];
 
-      // 3) Calcular fecha límite (hoy + N días, máx 20) -> 'YYYY-MM-DD'
+      // 4) Calcular fecha límite (hoy + N días, máx 20) -> 'YYYY-MM-DD'
       const n = Math.min(Math.max(parseInt(dias, 10) || 3, 1), 20);
       const hoy = new Date();
       const limite = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + n);
@@ -235,16 +245,16 @@ app.post(
       const dd = String(limite.getDate()).padStart(2, '0');
       const fechalimite = `${yyyy}-${mm}-${dd}`;
 
-      // 4) Crear promesa
+      // 5) Crear promesa
       const resp = await mikrowisp.crearPromesaPago({
-        idfactura: sel.id,
+        idfactura: selFactura.id,
         fechalimite,
         descripcion: descripcion || `Promesa ${n} día(s) vía Hibot`
       });
 
       return ok(res, {
         mensaje: resp?.mensaje || 'Promesa de pago registrada.',
-        idfactura: sel.id,
+        idfactura: selFactura.id,
         fechalimite
       });
     } catch (e) {
@@ -253,7 +263,34 @@ app.post(
   }
 );
 
-// === Health / Version ===
+/* -------------------------
+ *  OTROS ENDPOINTS
+ * ------------------------- */
+
+// Limpiar variable de cédula en HiBot
+app.all('/api/limpiar-id', (_req, res) => {
+  return res.json({ id: '', ID: '' });
+});
+
+// Probar cálculo de CORTE a partir de una factura (debug)
+app.get('/api/factura-corte', async (req, res) => {
+  try {
+    const { idfactura } = req.query;
+    if (!idfactura) return res.status(400).json({ estado: 'error', mensaje: 'Falta idfactura' });
+    const factura = await mikrowisp.obtenerFacturaPorId(idfactura);
+    const vencimiento = factura.vencimiento;
+    const fecha_corte = mikrowisp.calcularFechaCorteDesdeVencimientoStr(vencimiento);
+    return res.json({
+      estado: 'exito',
+      factura: { id: factura.id, total: factura.total, estado: factura.estado, vencimiento },
+      fecha_corte
+    });
+  } catch (e) {
+    return res.status(500).json({ estado: 'error', mensaje: e.response?.data || e.message });
+  }
+});
+
+// Health / Version
 app.get('/health', (_req, res) => res.json({ ok: true, uptime: process.uptime(), version: pkg.version }));
 app.get('/api/version', (_req, res) => res.json({ version: pkg.version }));
 
