@@ -120,7 +120,6 @@ async function crearPromesaPago({ idfactura, fechalimite, descripcion }) {
   return data;
 }
 
-
 // Facturas por cliente (0=pagadas, 1=no pagadas, 2=anuladas, vacío=cualquiera)
 async function obtenerFacturasPorCliente({ idcliente, estado = null, limit = 25 }) {
   const body = { token, idcliente: Number(idcliente), limit: Number(limit) };
@@ -191,6 +190,7 @@ async function consultarClientePorCedula(cedula) {
     const retirados = clientes.filter(c => (c.estado || '').toUpperCase() === 'RETIRADO');
     const activos_suspendidos = [...activos, ...suspendidos];
 
+    // ⛔ NO ENCONTRADO: sin Activo/Suspendido (aunque haya Retirados) o lista vacía
     if ((activos_suspendidos.length === 0 && retirados.length > 0) || clientes.length === 0) {
       return { notFound: true };
     }
@@ -204,17 +204,17 @@ async function consultarClientePorCedula(cedula) {
       const nombre = c.nombre || 'Usuario';
 
       if (estado === 'SUSPENDIDO') {
-  // calcular vencimiento/corte para el servicio suspendido
-  const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
+        // calcular vencimiento/corte para el servicio suspendido
+        const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
 
-  return {
-    mensaje:
-      `🚫 Estimado/a cliente *${nombre}*, Su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
-      `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. 💳` +
-      (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '') +
-      `\nSi ya realizó su pago, por favor envíe su comprobante.`
-  };
-}
+        return {
+          mensaje:
+            `🚫 Estimado/a cliente *${nombre}*, Su servicio se encuentra suspendido *POR FALTA DE PAGO*. ` +
+            `Tiene ${factNoPag} factura(s) pendiente(s) por un valor total a pagar de: $${total}. 💳` +
+            (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '') +
+            `\nSi ya realizó su pago, por favor envíe su comprobante.`
+        };
+      }
 
       if (estado === 'ACTIVO') {
         if (Number(factNoPag) === 0 || String(total) === '0.00') {
@@ -260,8 +260,8 @@ async function consultarClientePorCedula(cedula) {
       return { mensaje: out.trim() };
     }
 
-    // Residual
-    return { mensaje: '❗No existe un cliente registrado con esa cédula. Por favor verifique sus datos. Si cree que esto es un error, contáctenos.' };
+    // Residual: si nada calza, tratamos como no encontrado (sin mensaje)
+    return { notFound: true };
   } catch (e) {
     // Modo silencioso por defecto; con DEBUG=1 mostramos más info
     if (DEBUG) {
@@ -285,7 +285,7 @@ function servicioTieneDeuda(c) {
   return nopag > 0 && total > 0;
 }
 
-// ---- NUEVO: evaluación estructurada (para ramificar en HiBot)
+// ---- Evaluación estructurada (para ramificar en HiBot)
 async function evaluarClientePorCedula(cedula) {
   try {
     const clientes = await consultarClientePorCedulaRaw(cedula);
@@ -297,7 +297,7 @@ async function evaluarClientePorCedula(cedula) {
     // Nada útil
     if ((activos_suspendidos.length === 0 && retirados.length > 0) || clientes.length === 0) {
       return {
-         notFound: true,
+        notFound: true,
         tieneDeuda: false,
         variosServicios: 0,
         recomendacion: 'cerrar',
@@ -305,7 +305,7 @@ async function evaluarClientePorCedula(cedula) {
       };
     }
 
-    // Un solo servicio (más simple para flujo)
+    // Un solo servicio
     if (activos_suspendidos.length === 1) {
       const c = activos_suspendidos[0];
       const nombre = c.nombre || 'Usuario';
@@ -363,7 +363,7 @@ async function evaluarClientePorCedula(cedula) {
       }
     }
 
-    // Varios servicios: listamos y decidimos si pedir comprobante
+    // Varios servicios
     let tieneDeudaGlobal = false;
     let out = `Estimado/a cliente, actualmente cuenta con ${activos_suspendidos.length} servicios contratados:\n\n`;
     const servicios = [];
@@ -384,12 +384,11 @@ async function evaluarClientePorCedula(cedula) {
         vencFmt = r.vencFmt || null;
         corteStr = r.corteStr || null;
       }
-      
 
       if (estado === 'SUSPENDIDO') {
         linea =
           `🚫 *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
-                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
+          (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
       } else if (!conDeuda) {
         linea = `🌟 *${nombre}*, su servicio está ACTIVO ✅ y no tiene facturas pendientes.`;
       } else {
@@ -421,9 +420,6 @@ async function evaluarClientePorCedula(cedula) {
   }
 }
 
-
-
-
 module.exports = {
   consultarClientePorCedula,
   consultarClientePorCedulaRaw,
@@ -431,5 +427,5 @@ module.exports = {
   obtenerFacturasPorCliente,
   crearPromesaPago,
   calcularFechaCorteDesdeVencimientoStr,
-  evaluarClientePorCedula 
+  evaluarClientePorCedula
 };

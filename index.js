@@ -4,8 +4,8 @@ const mikrowisp = require('./mikrowisp');
 const hibot = require('./hibot');
 const { limpiarNumeroEcuador } = require('./utils');
 const pkg = require('./package.json');
-const multer = require('multer');               // <-- nuevo
-const upload = multer();                        // <-- nuevo
+const multer = require('multer');
+const upload = multer();
 
 const app = express();
 app.use(express.json());
@@ -21,6 +21,7 @@ app.get('/api/cliente', async (req, res) => {
   if (!cedula) return bad(res, 'Cédula no proporcionada');
   try {
     const datos = await mikrowisp.consultarClientePorCedula(cedula);
+    // Para compatibilidad, GET devuelve 200 siempre con el objeto (usa notFound si procede)
     return res.json(datos);
   } catch (e) {
     return bad(res, 'Error interno consultando cliente', 500);
@@ -28,12 +29,11 @@ app.get('/api/cliente', async (req, res) => {
 });
 
 // === Limpiar variable de cédula (Hibot) ===
-// Acepta GET o POST y siempre responde con id/ID vacío
-app.all('/api/limpiar-id', (req, res) => {
+app.all('/api/limpiar-id', (_req, res) => {
   return res.json({ id: '', ID: '' });
 });
 
-
+// === Consulta por cédula (POST) para ramificar en Easyflow (200/400) ===
 app.post('/api/cliente', async (req, res) => {
   const { cedula } = req.body || {};
   const ced = String(cedula || '').trim();
@@ -58,7 +58,6 @@ app.post('/api/cliente', async (req, res) => {
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });
-
 
 // === NUEVO: Datos RAW de MikroWisp ===
 app.get('/api/cliente/raw', async (req, res) => {
@@ -98,7 +97,7 @@ app.post('/api/enviar-sticker', async (req, res) => {
   }
 });
 
-// === NUEVO: Enviar texto ===
+// === Enviar texto ===
 app.post('/api/enviar-texto', async (req, res) => {
   const { numero, texto } = req.body || {};
   const recipient = limpiarNumeroEcuador(numero);
@@ -111,7 +110,7 @@ app.post('/api/enviar-texto', async (req, res) => {
   }
 });
 
-// === Consulta y envía al número recibido (mejorado) ===
+// === Consulta y envía al número recibido (mejorado)
 app.post('/api/cliente-enviar', async (req, res) => {
   const { cedula, numero } = req.body || {};
   const recipient = limpiarNumeroEcuador(numero);
@@ -125,7 +124,7 @@ app.post('/api/cliente-enviar', async (req, res) => {
   }
 });
 
-// === Probar cálculo de CORTE desde una idfactura (usa GetInvoice) ===
+// === Probar cálculo de CORTE desde una idfactura (usa GetInvoice)
 app.get('/api/factura-corte', async (req, res) => {
   try {
     const { idfactura } = req.query;
@@ -145,7 +144,7 @@ app.get('/api/factura-corte', async (req, res) => {
   }
 });
 
-// === NUEVO: Evaluación estructurada para ramificar el flujo ===
+// === Evaluación estructurada para ramificar el flujo
 app.post('/api/cliente-evaluar', async (req, res) => {
   try {
     let payload = req.body;
@@ -163,24 +162,19 @@ app.post('/api/cliente-evaluar', async (req, res) => {
   }
 });
 
-
-// === Crear Promesa de Pago por cédula (3 días por defecto) ===
-// Acepta JSON, urlencoded, multipart/form-data (sin archivos) y texto JSON
+// === Crear Promesa de Pago por cédula (3 días por defecto)
 app.post(
   '/api/promesa-pago',
-  upload.none(),                        // <-- parsea form-data (fields)
-  express.text({ type: ['text/*', '*/*'] }), // <-- si viene texto plano
+  upload.none(),
+  express.text({ type: ['text/*', '*/*'] }),
   async (req, res) => {
     try {
       // Normalizar payload
       let payload = req.body;
 
-      // Si vino como string (por text/plain), intentar parsear JSON
       if (typeof payload === 'string') {
         try { payload = JSON.parse(payload); } catch (_) { payload = {}; }
       }
-
-      // Si vino vacío, usar querystring (?cedula=...)
       if (!payload || Object.keys(payload).length === 0) {
         payload = req.query || {};
       }
@@ -251,8 +245,8 @@ app.post(
 );
 
 // === Health / Version ===
-app.get('/health', (req, res) => res.json({ ok: true, uptime: process.uptime(), version: pkg.version }));
-app.get('/api/version', (req, res) => res.json({ version: pkg.version }));
+app.get('/health', (_req, res) => res.json({ ok: true, uptime: process.uptime(), version: pkg.version }));
+app.get('/api/version', (_req, res) => res.json({ version: pkg.version }));
 
 // Puerto
 const PORT = process.env.PORT || 10000;
