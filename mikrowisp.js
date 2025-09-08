@@ -296,13 +296,13 @@ function lineaServicioParaLista(c, idx, vencFmt, corteStr) {
 
   if (estado === 'SUSPENDIDO') {
     return `*${n}.-)* *${nombre}*: 🚫 Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
-                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '\n\n');
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
   }
   if (conDeuda) {
     return `*${n}.-)* *${nombre}*: ⚠️ Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
-                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '\n\n');
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
   }
-  return `*${n}.-)* *${nombre}*: ✅ Su servicio se encuentra activo y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!\n\n`;
+  return `*${n}.-)* *${nombre}*: ✅ Su servicio se encuentra activo y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`;
 }
 
 
@@ -381,7 +381,7 @@ async function evaluarClientePorCedula(cedula) {
         const r = await obtenerVencimientoYCorteParaServicio(c);
         vencFmt = r.vencFmt || null;
         corteStr = r.corteStr || null;
-        serviciosTexto += lineaServicioParaLista(c, i, vencFmt, corteStr) + '\n';
+        serviciosTexto += lineaServicioParaLista(c, i, vencFmt, corteStr) + '\n\n';
       }
 
       const mensaje =
