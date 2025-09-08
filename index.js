@@ -141,19 +141,32 @@ app.post('/api/enviar-texto', async (req, res) => {
   }
 });
 
-// Consulta + envío del mensaje generado
+// === Consulta y envía al número recibido (ajustado para 400 si no existe) ===
 app.post('/api/cliente-enviar', async (req, res) => {
   const { cedula, numero } = req.body || {};
   const recipient = limpiarNumeroEcuador(numero);
-  if (!cedula || !recipient) return bad(res, 'Faltan datos requeridos (cedula y numero en formato EC)');
+  if (!cedula || !recipient) {
+    return bad(res, 'Faltan datos requeridos (cedula y numero en formato EC)');
+  }
+
   try {
     const datos = await mikrowisp.consultarClientePorCedula(cedula);
-    await hibot.enviarTexto({ recipient, texto: datos.mensaje || 'No se pudo generar el mensaje.' });
+
+    // ⬇️ Cambio clave: si no existe el cliente, responde 400
+    if (datos?.notFound) {
+      return res.status(400).json({ error: 'CLIENTE_NO_ENCONTRADO' });
+    }
+
+    // Si existe, enviamos el texto normalmente (sin mensaje genérico de fallback)
+    const texto = datos?.mensaje || '';
+    await hibot.enviarTexto({ recipient, texto });
+
     return ok(res, { mensaje: '¡Listo! Consulta enviada a tu WhatsApp.' });
   } catch (e) {
     return bad(res, e.response?.data || e.message, 500);
   }
 });
+
 
 /* -------------------------
  *  PROMESA DE PAGO

@@ -301,7 +301,7 @@ function lineaServicioParaLista(c, idx, vencFmt, corteStr) {
     return `*${n})* *${nombre}*: ⚠️ Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
                    (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
   }
-  return `*${n})* *${nombre}*: ✅ Su servicio se encuentra activo ✅ y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`;
+  return `*${n})* *${nombre}*: ✅ Su servicio se encuentra activo y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`;
 }
 
 
