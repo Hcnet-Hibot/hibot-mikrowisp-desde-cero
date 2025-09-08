@@ -295,14 +295,14 @@ function lineaServicioParaLista(c, idx, vencFmt, corteStr) {
   const conDeuda = servicioTieneDeuda(c);
 
   if (estado === 'SUSPENDIDO') {
-    return `*${n})* *${nombre}*: 🚫 Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
-                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '\n');
+    return `*${n}.-)* *${nombre}*: 🚫 Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '\n\n');
   }
   if (conDeuda) {
-    return `*${n})* *${nombre}*: ⚠️ Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
-                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '\n');
+    return `*${n}.-)* *${nombre}*: ⚠️ Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '\n\n');
   }
-  return `*${n})* *${nombre}*: ✅ Su servicio se encuentra activo y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`;
+  return `*${n}.-)* *${nombre}*: ✅ Su servicio se encuentra activo y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!\n\n`;
 }
 
 

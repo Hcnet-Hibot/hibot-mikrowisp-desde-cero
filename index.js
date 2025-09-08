@@ -68,16 +68,23 @@ app.post('/api/cliente-evaluar', async (req, res) => {
 
     const r = await mikrowisp.evaluarClientePorCedula(cedula);
 
-    // Si no hay cliente -> 400 para que caiga a tu rama de error en Easyflow
     if (r?.notFound) {
       return res.status(400).json({ error: 'CLIENTE_NO_ENCONTRADO', ...r });
     }
-    // Si existe -> 200 con todas las variables (mensaje, variosServiciosValidos, serviciosTexto, etc.)
-    return ok(res, r);
+
+    // ⬇️ Alias para Easyflow
+    const v = Number(r.variosServiciosValidos || 0);
+    return ok(res, {
+      ...r,
+      VARIOS_VALIDOS: v,                // cantidad de items listados
+      VARIOS_VALIDOS_MAS_UNO: v + 1,    // para simular "≤"
+      SERVICIOS_LISTA: r.serviciosTexto || ''
+    });
   } catch (e) {
     return bad(res, e.response?.data || e.message, 500);
   }
 });
+
 
 // Datos RAW (para debug)
 app.get('/api/cliente/raw', async (req, res) => {
