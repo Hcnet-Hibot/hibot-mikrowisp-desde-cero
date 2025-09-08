@@ -210,22 +210,39 @@ app.post(
         return estado === 'SUSPENDIDO' || conDeuda;
       });
 
-      // 2) Seleccionar el servicio objetivo:
-      let servicioObjetivo = null;
+    // 2) Seleccionar el servicio objetivo (VALIDACIÓN ESTRICTA)
+let servicioObjetivo = null;
 
-      // a) Si el flujo envió "seleccion" (1-based) y es válida -> tomar ese
-      const selN = parseInt(seleccion, 10);
-      if (Number.isInteger(selN) && selN >= 1 && selN <= validos.length) {
-        servicioObjetivo = validos[selN - 1];
-      }
+// ¿El flujo envió "seleccion" explícitamente?
+const vieneSeleccion = typeof seleccion !== 'undefined' && String(seleccion).trim() !== '';
 
-      // b) Si no vino seleccion válida -> primer válido; si no hay, primer candidato
-      if (!servicioObjetivo) {
-        servicioObjetivo =
-          validos[0] ||
-          activos_suspendidos.find(c => Number(c?.facturacion?.facturas_nopagadas || 0) > 0) ||
-          activos_suspendidos[0];
-      }
+if (vieneSeleccion) {
+  const selN = parseInt(seleccion, 10);
+
+  // Si la selección no es un entero entre 1 y validos.length -> devolver 400
+  if (!Number.isInteger(selN) || selN < 1 || selN > validos.length) {
+    return res.status(400).json({
+      error: 'SELECCION_INVALIDA',
+      min: 1,
+      max: validos.length
+    });
+  }
+
+  // Selección válida: tomar ese servicio (1-based)
+  servicioObjetivo = validos[selN - 1];
+} else {
+  // Sin selección explícita:
+  // - si solo hay un válido, usarlo
+  // - si hay varios, priorizar con deuda; si no, el primero
+  if (validos.length === 1) {
+    servicioObjetivo = validos[0];
+  } else {
+    servicioObjetivo =
+      validos.find(c => Number(c?.facturacion?.facturas_nopagadas || 0) > 0) ||
+      validos[0];
+  }
+}
+
 
       // 3) Buscar facturas NO PAGADAS del servicio seleccionado
       const idcliente =
