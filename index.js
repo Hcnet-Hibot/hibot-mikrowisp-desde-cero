@@ -283,17 +283,27 @@ if (vieneSeleccion) {
       const fechalimite = `${yyyy}-${mm}-${dd}`;
 
       // 5) Crear promesa
-      const resp = await mikrowisp.crearPromesaPago({
-        idfactura: selFactura.id,
-        fechalimite,
-        descripcion: descripcion || `Promesa ${n} día(s) vía Hibot`
-      });
+const resp = await mikrowisp.crearPromesaPago({
+  idfactura: selFactura.id,
+  fechalimite,
+  descripcion: descripcion || `Promesa ${n} día(s) vía Hibot`
+});
 
-      return ok(res, {
-        mensaje: resp?.mensaje || 'Promesa de pago registrada.',
-        idfactura: selFactura.id,
-        fechalimite
-      });
+// 👉 NUEVO: nombre del cliente/servicio seleccionado
+const nombreCliente =
+  servicioObjetivo?.nombre ??
+  servicioObjetivo?.Cliente ??
+  servicioObjetivo?.cliente ??
+  servicioObjetivo?.nombres ??
+  'Cliente';
+
+return ok(res, {
+  mensaje: resp?.mensaje || 'Promesa de pago registrada.',
+  idfactura: selFactura.id,
+  fechalimite,
+  nombre: nombreCliente            // ← **esto es lo que mapearás**
+});
+
     } catch (e) {
       return bad(res, e.response?.data || e.message, 500);
     }
