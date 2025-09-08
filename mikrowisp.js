@@ -248,7 +248,7 @@ async function consultarClientePorCedula(cedula) {
                  `\n\n`;
         } else if (estado === 'ACTIVO') {
           if (Number(factNoPag) === 0 || String(total) === '0.00') {
-            out += `✅ *${nombre}*: Activo y sin deudas.\n\n`;
+            out += `✅ *${nombre}*: Este servicio se encuentra activo y no cuenta con facturas pendientes.\n\n`;
           } else {
             const { vencFmt, corteStr } = await obtenerVencimientoYCorteParaServicio(c);
             out += `⚠️ *${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${total}. 💳` +
@@ -294,12 +294,14 @@ function lineaServicioParaLista(c, idx, vencFmt, corteStr) {
   const conDeuda = servicioTieneDeuda(c);
 
   if (estado === 'SUSPENDIDO') {
-    return `*${n})* *${nombre}*: 🚫 Suspendido. Total: $${totalStr}${corteStr ? `\n   ⛔ Corte: ${corteStr}` : ''}`;
+    return `*${n})* *${nombre}*: 🚫 Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
   }
   if (conDeuda) {
-    return `*${n})* *${nombre}*: ⚠️ Factura disponible. Total: $${totalStr}${vencFmt ? `\n   📅 Vence: ${vencFmt}` : ''}`;
+    return `*${n})* *${nombre}*: ⚠️ Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
   }
-  return `*${n})* *${nombre}*: ✅ Activo sin deudas`;
+  return `*${n})* *${nombre}*: ✅ Su servicio se encuentra activo ✅ y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`;
 }
 
 
@@ -345,17 +347,12 @@ async function evaluarClientePorCedula(cedula) {
       let mensaje = '';
       if (estado === 'SUSPENDIDO') {
         mensaje =
-          `🚫 Estimado/a *${nombre}*, su servicio está SUSPENDIDO por falta de pago.\n` +
-          `💵 Total pendiente: $${totalStr}.\n` +
-          (vencFmt ? `📅 Vencimiento: ${vencFmt}\n` : '') +
-          (corteStr ? `⛔ Corte: ${corteStr}\n` : '') +
-          `Si ya realizó su pago, por favor envíe su comprobante.`;
+          `🚫 Estimado/a cliente *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
       } else {
         mensaje =
-          `⚠️ Estimado/a *${nombre}*, ya se encuentra disponible su factura.\n` +
-          `💵 Total: $${totalStr}.\n` +
-          (vencFmt ? `📅 Vencimiento: ${vencFmt}\n` : '') +
-          (corteStr ? `⛔ Corte: ${corteStr}\n` : '');
+          `⚠️ Estimado/a cliente*${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
       }
 
       return {
@@ -388,8 +385,7 @@ async function evaluarClientePorCedula(cedula) {
 
       const mensaje =
         `He encontrado ${validos.length} servicio(s) con pago pendiente a su nombre:\n\n` +
-        `${serviciosTexto}\n` +
-        `Escriba el *número* de la línea que desea pagar/activar.`;
+        `${serviciosTexto}`;
 
       return {
         variosServicios: activos_suspendidos.length,
@@ -416,7 +412,7 @@ async function evaluarClientePorCedula(cedula) {
       variosServiciosValidos: 0,
       serviciosTexto: '',
       recomendacion: 'cerrar',
-      mensaje: `🌟 Estimado/a *${nombre}*, todos sus servicios están ACTIVO ✅ y sin deudas.`
+      mensaje: `🌟 Estimado/a cliente *${nombre}*, su servicio se encuentra activo ✅ y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`
     };
   } catch (e) {
     if (DEBUG) {
