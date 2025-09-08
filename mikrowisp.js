@@ -348,11 +348,11 @@ async function evaluarClientePorCedula(cedula) {
       if (estado === 'SUSPENDIDO') {
         mensaje =
           `🚫 Estimado/a cliente *${nombre}*: Su servicio se encuentra suspendido *POR FALTA DE PAGO*. El valor total a pagar es: $${totalStr}. 💳` +
-                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '');
+                 (corteStr ? `\n⛔ *Su fecha de corte se realizó el día:* ${corteStr}AM` : '\n');
       } else {
         mensaje =
           `⚠️ Estimado/a cliente*${nombre}*: Ya se encuentra disponible su factura. El valor total a pagar es: $${totalStr}. 💳 ` +
-                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '');
+                   (corteStr ? `\n⛔ *Su fecha de corte es el día:* ${corteStr}AM` : '\n');
       }
 
       return {
@@ -412,7 +412,7 @@ async function evaluarClientePorCedula(cedula) {
       variosServiciosValidos: 0,
       serviciosTexto: '',
       recomendacion: 'cerrar',
-      mensaje: `🌟 Estimado/a cliente *${nombre}*, su servicio se encuentra activo ✅ y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!`
+      mensaje: `🌟 Estimado/a cliente *${nombre}*, su servicio se encuentra activo ✅ y no cuenta con facturas pendientes. ¡Gracias por confiar en nosotros!\n`
     };
   } catch (e) {
     if (DEBUG) {
